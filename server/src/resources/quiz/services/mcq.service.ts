@@ -68,14 +68,18 @@ export default class McqService {
     title: string,
     mcqs: MCQ[],
     category: string,
+    score: number,
   ) {
     try {
       const mcq = await this.mcq
-        .findByIdAndUpdate(mcqId, { title, mcqs, category }, { new: true })
+        .findByIdAndUpdate(
+          mcqId,
+          { title, mcqs, category, score },
+          { new: true },
+        )
         .exec();
 
       if (!mcq) {
-        console.log("MCQ Not Found.");
         throw new Error("Flashcard not found");
       }
 

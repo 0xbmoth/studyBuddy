@@ -29,6 +29,12 @@ export interface CategoryStat {
   attempts: number;
 }
 
+export interface TitleStat {
+  name: string;
+  correct: number;
+  total: number;
+}
+
 export interface WeeklyData {
   timestamp: Date;
   score: number;
@@ -39,7 +45,6 @@ export interface WeeklyData {
 
 export interface UserStats {
   totalAttempts: number;
-  // flashcardsAttempts: number;
   weeklyData: WeeklyData[];
   categoryData: CategoryStat[];
   answered: number;

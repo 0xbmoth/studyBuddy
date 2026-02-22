@@ -53,10 +53,9 @@ export default function UploadJson({
         const fileContents = await readFileAsText(selectedFile);
         
         const jsonData: QuestionsUpload = JSON.parse(fileContents);
+        console.log(jsonData)
 
         setExtractedText(jsonData)
-        
-        console.log('Parsed JSON:', jsonData);
         
     } catch (error) {
         console.error('Error reading or parsing JSON file:', error);

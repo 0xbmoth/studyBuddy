@@ -2,6 +2,8 @@ import { useState } from "react"
 import { navLinks } from "../../utils/constants"
 import { Link } from "react-scroll";
 import { Link as RouterLink } from "react-router-dom";
+import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function Navbar() {
   const [toggle, setToggle] = useState(false);
@@ -49,8 +51,8 @@ export default function Navbar() {
                 className={`${toggle ? 'translate-x-0' : 'translate-x-full'} fixed top-0 right-0 h-full w-64 bg-gradient-to-b bg-white p-6 z-[99] transition-transform duration-300 ease-in-out`}>
                 <div className="flex justify-between items-center mb-6">
                     <div className="cursor-pointer dark:text-gray-300" onClick={() => setToggle(false)}>
-                        <span className="material-symbols-outlined text-3xl">
-                            close
+                        <span className="text-3xl">
+                            <FontAwesomeIcon icon={faClose} />
                         </span>
                     </div>
                 </div>

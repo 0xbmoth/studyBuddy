@@ -10,6 +10,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Output } from "../types/output";
 import DeleteTopic from "../components/modals/DeleteTopic";
 import Generate from "../components/modals/Generate";
+import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function FlashcardsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -91,8 +93,8 @@ export default function FlashcardsPage() {
           
           <div className="flex rounded-lg cursor-pointer gap-4 p-2 w-fit mt-2" onClick={() => setIsOpen(true)}>
             <div className="flex gap-2">
-              <span className="text-2xl bg-pink-100 hover:bg-pink-200 transition px-2 dark:bg-[#3b3939] dark:hover:bg-[#2b2929] rounded-md material-symbols-outlined">
-                add
+              <span className="text-2xl bg-pink-100 hover:bg-pink-200 transition px-2 dark:bg-[#3b3939] dark:hover:bg-[#2b2929] rounded-md">
+                +
               </span>
               <p className="text-xl">Generate Flashcards:</p>
             </div> 
@@ -152,8 +154,10 @@ export default function FlashcardsPage() {
                             setDel(true);
                             setTopicId(topic.id);
                           }}
-                            className="p-1 text-gray-400 hover:text-red-500 cursor-pointer material-symbols-outlined"                        >
-                          <p className="rounded-full bg-[#2A2A2A] p-1">delete</p>
+                            className="p-1 text-gray-400 hover:text-red-500 cursor-pointer">
+                          <p className="rounded-full bg-[#2A2A2A] p-1">
+                            <FontAwesomeIcon icon={faTrashCan}/>
+                          </p>
                         </div>
                       </div>
                     ))}

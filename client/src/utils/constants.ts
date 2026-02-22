@@ -1,3 +1,5 @@
+import { faChartLine, faNoteSticky, faQuestion, faSliders } from "@fortawesome/free-solid-svg-icons";
+
 export const navLinks = [
   {
     id: "home",
@@ -96,25 +98,25 @@ export const feedback = [
 export const sidebar = [
   {
     id: "dashboard",
-    icon: "dashboard",
+    icon: faChartLine,
     link: "dashboard",
     name: "Dashboard",
   },
   {
     id: "flashcards",
-    icon: "description",
+    icon: faNoteSticky,
     link: "flashcards",
     name: "Flashcards",
   },
   {
     id: "quiz",
-    icon: "quiz",
+    icon: faQuestion,
     link: "quiz",
     name: "Quiz",
   },
   {
     id: "settings",
-    icon: "settings",
+    icon: faSliders,
     link: "settings",
     name: "Settings",
   },

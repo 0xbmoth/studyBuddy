@@ -33,6 +33,8 @@ export default function Quiz() {
                 correct: "not answered" as answerKind,
             }));
 
+            console.log(mcq)
+
             Object.entries(answers).forEach(([index, answer]) => {
                 const idx = parseInt(index, 10);
                 if (idx >= 0 && idx < corrections.length) {

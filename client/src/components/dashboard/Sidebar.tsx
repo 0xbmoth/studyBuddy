@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom"
 import { sidebar } from "../../utils/constants"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 interface SidebarProps {
     isSidebarOpen: boolean
@@ -17,9 +18,7 @@ export default function Sidebar({isSidebarOpen}: SidebarProps) {
         <div className="p-4 mt-16">
           {sidebar.map(element => (
             <NavLink to={'/' + element.link} key={element.id} className="text-black dark:text-white p-4 flex gap-4 rounded-lg hover:bg-yellow-100 dark:hover:bg-[#2F2F2F]">
-              <span className="material-symbols-outlined">
-                {element.icon}
-              </span>
+              <FontAwesomeIcon style={{marginTop: "5px"}} icon={element.icon} />
               <p className="">
                 {element.name}
               </p>

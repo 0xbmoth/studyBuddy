@@ -3,4 +3,5 @@ export type Topic = {
   category: string;
   numberOfQuestions: number;
   id: string;
+  score: string;
 };

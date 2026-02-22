@@ -1,14 +1,15 @@
-import { useEffect, useReducer, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useContext, useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
 import Topics from "../components/topic/Topics";
 import { Topic } from "../types/Topic";
 import { MCQ, MCQs } from "../types/mcq";
-import { initialState, reducer } from "../reducer/store";
 import { axiosInstance } from "../services/auth.service";
 import { Upload } from "lucide-react";
 import UploadJson from "../components/modals/UploadJson";
 import Generate from "../components/modals/Generate";
+import { StateContext } from "../context/context";
 
 export default function QuizPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -20,7 +21,7 @@ export default function QuizPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [quizId, ] = useState("")
   const [mcq, setMcq] = useState<MCQs>();
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const { state, dispatch } = useContext(StateContext);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -28,22 +29,22 @@ export default function QuizPage() {
   
   useEffect(() => {
     axiosInstance.get(`/quiz`)
-      .then((response) => {
-        const mcqs = response.data.mcq
-        const userTopics: Topic[] = mcqs.map((mcq: MCQs) => ({
-          name: mcq.title,
-          category: mcq.category,
-          numberOfQuestions: mcq.mcqs?.length - 1,
-          id: mcq._id
-        }))
+    .then((response) => {
+      const mcqs = response.data.mcq
+      const userTopics: Topic[] = mcqs.map((mcq: MCQs) => ({
+        name: mcq.title,
+        category: mcq.category,
+        numberOfQuestions: mcq.mcqs?.length - 1,
+        id: mcq._id,
+        score: `${mcq.score}/${mcq.mcqs.length}`
+      }))
 
-        const selectMcq: MCQs = mcqs.find((mcq: MCQs) => mcq._id === quizId)
-        setMcq(selectMcq)
+      const selectMcq: MCQs = mcqs.find((mcq: MCQs) => mcq._id === quizId)
+      setMcq(selectMcq)
 
-        dispatch({type: "GET_MCQS", payload: mcqs})
-        dispatch({type: 'GET_MCQS_TOPIC', payload: userTopics})
-        
-      }).catch((err) => console.log(err))
+      dispatch({type: "GET_MCQS", payload: mcqs})
+      dispatch({type: 'GET_MCQS_TOPIC', payload: userTopics})
+    }).catch((err) => console.log(err))
   }, [quizId])
 
   return (
@@ -68,8 +69,8 @@ export default function QuizPage() {
               className="flex gap-2"
               onClick={() => setIsGenerateOpen(true)}
             >
-              <span className="text-2xl bg-pink-100 hover:bg-pink-200 transition px-2 dark:bg-[#3b3939] dark:hover:bg-[#2b2929] rounded-md material-symbols-outlined">
-                add
+              <span className="text-2xl bg-pink-100 hover:bg-pink-200 transition px-2 dark:bg-[#3b3939] dark:hover:bg-[#2b2929] rounded-md">
+                +
               </span>
               <p className="text-xl">Generate a Quiz:</p>
             </div>

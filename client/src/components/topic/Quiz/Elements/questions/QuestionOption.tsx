@@ -1,3 +1,5 @@
+import { faEdit, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FC, MouseEvent } from 'react';
 
 interface QuestionOptionProps {
@@ -46,13 +48,13 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
             </label>
             <div className="flex gap-2">
                 <button onClick={onEditClick} type="button">
-                    <span className="material-symbols-outlined dark:text-white hover:dark:text-zinc-800 hover:bg-gray-200 p-2 rounded-lg">
-                        edit
+                    <span className="dark:text-white hover:dark:text-zinc-800 hover:bg-gray-200 p-2 rounded-lg">
+                        <FontAwesomeIcon icon={faEdit} />
                     </span>
                 </button>
                 <button onClick={onDeleteClick} type="button">
-                    <span className="material-symbols-outlined hover:bg-gray-200 p-2 rounded-lg text-red-500">
-                        delete
+                    <span className="hover:bg-gray-200 p-2 rounded-lg text-red-500">
+                        <FontAwesomeIcon icon={faTrashCan} />
                     </span>
                 </button>
             </div>

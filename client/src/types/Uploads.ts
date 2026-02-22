@@ -8,8 +8,6 @@ export type QuestionUpload = {
 
 export type QuestionsUpload = {
   questions: QuestionUpload[];
-  module: string;
-  session: string;
 };
 
 export const transformQuestions = (

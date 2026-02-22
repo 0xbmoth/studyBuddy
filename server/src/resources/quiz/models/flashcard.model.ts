@@ -30,7 +30,7 @@ const flashcardsSchema = new Schema(
       type: String,
       required: true,
     },
-    flashcards: [flashcardSchema], // Array of flashcards
+    flashcards: [flashcardSchema],
     user: {
       type: Types.ObjectId,
       ref: "User",

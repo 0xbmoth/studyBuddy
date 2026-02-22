@@ -3,7 +3,9 @@ export type MCQ = {
   answers: number[];
   question: string;
   options: string[];
+  explanation: string;
   answered?: boolean;
+  score?: number;
 };
 
 export type MCQs = {
@@ -11,6 +13,7 @@ export type MCQs = {
   title: string;
   category: string;
   _id?: string;
+  score?: number;
 };
 
 export interface EditingOption {

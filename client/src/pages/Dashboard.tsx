@@ -10,8 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  // BarChart as RechartsBarChart,
-  // Bar,
   PieChart as RechartsPieChart,
   Pie,
   Cell
@@ -36,7 +34,6 @@ export default function Dashboard() {
   const [flashcardsCreated, setFlashcardsCreated] = useState<number>(0);
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
   const [categoryData, setCategoryData] = useState<CategoryStat[]>([]);
-  // const [difficultyStats, ] = useState<DifficultyStats>({ easy: 0, medium: 0, hard: 0 });
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -62,18 +59,17 @@ export default function Dashboard() {
     
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    
+
     const userId = jwtDecode(refreshToken).id;
     axiosInstance.get(`/attempt/user/${userId}`)
       .then((response) => {
-        console.log(response.data);
         const { 
           weeklyData,
           categoryData,
           answered,
           totalCorrectAnswers,
           totalWrongAnswers,
-          currentStreak
+          currentStreak,
         } = response.data;
         
         if (questionsCount && questionsCount > 0) {
@@ -178,12 +174,6 @@ const formattedWeeklyData = allWeekdays.map((day) => {
     value: parseFloat(category.avgScore.toFixed(2)),
   }));
 
-  // const formattedDifficultyData = [
-  //   { difficulty: 'Easy', count: difficultyStats.easy },
-  //   { difficulty: 'Medium', count: difficultyStats.medium },
-  //   { difficulty: 'Hard', count: difficultyStats.hard }
-  // ];
-
   return (
     <div className="dark:bg-[#111111] bg-white min-h-screen">
       <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -271,19 +261,6 @@ const formattedWeeklyData = allWeekdays.map((day) => {
                   </RechartsPieChart>}
                 </ResponsiveContainer>
               </div>
-
-              {/* <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
-                <h3 className="text-lg font-medium dark:text-gray-100 mb-4">Difficulty Distribution</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RechartsBarChart data={formattedDifficultyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="difficulty" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#8884d8" />
-                  </RechartsBarChart>
-                </ResponsiveContainer>
-              </div> */}
             </div>
           </div>
         </main>

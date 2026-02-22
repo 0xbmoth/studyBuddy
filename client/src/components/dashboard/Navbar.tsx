@@ -1,4 +1,4 @@
-import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faBurger, faClose, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useReducer, useState } from "react";
 import { getTheme } from "../../utils/theme";
@@ -39,9 +39,7 @@ export default function Navbar({isSidebarOpen, toggleSidebar}: NavbarProps) {
                     className="p-1 mr-4 rounded-md text-white bg-[#2F2F2F]"
                     onClick={toggleSidebar}
                 >
-                    <span className={`material-symbols-outlined`}>
-                        {isSidebarOpen ? "close" : "menu_open"}
-                    </span>
+                    <FontAwesomeIcon icon={isSidebarOpen ? faClose : faBars} />
                     
                 </button>
                 <h1 className="text-2xl font-semibold dark:text-white text-zinc-800 font-serif">StudyBuddy,</h1>

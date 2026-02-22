@@ -84,8 +84,6 @@ class QuizController implements Controller {
     try {
       const category = req.params.category;
 
-      console.log(category);
-
       await this.McqService.deleteCategory(category);
 
       res.status(200).json("Category deleted successfully");
@@ -133,9 +131,11 @@ class QuizController implements Controller {
         title,
         category,
         mcqs,
-      }: { title: string; category: string; mcqs: MCQ[] } = req.body;
+        score,
+      }: { title: string; category: string; mcqs: MCQ[]; score: number } =
+        req.body;
 
-      await this.McqService.edit(mcqId, title, mcqs, category);
+      await this.McqService.edit(mcqId, title, mcqs, category, score);
 
       res.status(200).json("quiz Deleted Successfully");
     } catch (err) {

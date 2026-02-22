@@ -6,6 +6,7 @@ import {
   UserStats,
   WeeklyData,
   CategoryStat,
+  TitleStat,
 } from "../interfaces/attempt.interface";
 import { startOfDay, differenceInDays, subDays } from "date-fns";
 
@@ -18,7 +19,6 @@ export class AnalyticsService {
         recentMCQs,
         titleStats,
         categoryStats,
-        answersStats,
       ] = await Promise.all([
         MCQAttemptModel.countDocuments({
           userId,
@@ -176,22 +176,6 @@ export class AnalyticsService {
 
           { $sort: { name: 1 } },
         ]),
-
-        // ALTERNATIVE: If category is stored directly in MCQAttempt documents
-        MCQAttemptModel.aggregate([
-          { $match: { userId } },
-          {
-            $match: {
-              category: { $exists: true, $ne: null }, // Only process documents with category
-            },
-          },
-          {
-            $group: {
-              _id: "$category",
-              count: { $sum: 1 },
-            },
-          },
-        ]),
       ]);
 
       const weeklyData: WeeklyData[] = recentMCQs.map((mcq) => {
@@ -268,8 +252,6 @@ export class AnalyticsService {
         }
       }
 
-      console.log("Final categoryData:", categoryData);
-
       return {
         totalAttempts: mcqsAttempts,
         weeklyData,
@@ -282,39 +264,6 @@ export class AnalyticsService {
     } catch (error) {
       console.error("Error fetching user stats:", error);
       throw new Error("Failed to fetch user statistics");
-    }
-  }
-
-  // DEBUG METHOD: Add this method to help diagnose the issue
-  public async debugCategoryLookup(userId: string): Promise<any> {
-    try {
-      const debugResult = await MCQAttemptModel.aggregate([
-        { $match: { userId: userId } },
-        { $limit: 5 }, // Just check first 5 documents
-        {
-          $lookup: {
-            from: "mcqs",
-            localField: "title",
-            foreignField: "title",
-            as: "mcqInfo",
-          },
-        },
-        {
-          $project: {
-            title: 1,
-            originalCategory: "$category", // Category from attempts collection
-            mcqInfo: 1, // Full lookup result
-            lookupCategory: { $arrayElemAt: ["$mcqInfo.category", 0] },
-            lookupSize: { $size: "$mcqInfo" },
-          },
-        },
-      ]);
-
-      console.log("Debug lookup result:", JSON.stringify(debugResult, null, 2));
-      return debugResult;
-    } catch (error) {
-      console.error("Debug lookup error:", error);
-      throw error;
     }
   }
 

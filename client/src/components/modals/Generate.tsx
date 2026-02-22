@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { Flashcard } from "../../types/flashcard";
 import { MCQ, MCQs } from "../../types/mcq";
 import { axiosInstance } from "../../services/auth.service";
-import { formatJson } from "../../utils/format";
 
 interface GenerateProps {
   isOpen: boolean;
@@ -84,11 +83,7 @@ export default function Generate({
 
     try {
       const response = await axiosInstance.post("http://localhost:3000/api/generate", requestData);
-
-      console.log(response.data);
-      const aiResponse = response.data.aiResponse.trim();
-      const formattedJson = formatJson(aiResponse);
-      const parsedData = JSON.parse(formattedJson);
+      const parsedData = response.data.aiResponse;
 
       setLoading(false);
       setIsGenerating(false);
@@ -104,6 +99,7 @@ export default function Generate({
               question: q.question,
               options: q.options,
               answers: q.answers,
+              explanation: q.explanation
           })),
           title: form.topicName,
           category: form.category,

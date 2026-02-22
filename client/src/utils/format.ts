@@ -1,4 +1,4 @@
-import { MCQs, MCQsQuiz } from "../types/mcq";
+import { MCQs } from "../types/mcq";
 
 export function formatJson(jsonString: string) {
   if (!jsonString) {
@@ -27,7 +27,7 @@ export default function formatString(string: string, numlines: number) {
   return paragraphs;
 }
 
-export function formatMcq(mcq: MCQs): MCQsQuiz {
+export function formatMcq(mcq: MCQs): MCQs {
   return {
     ...mcq,
     mcqs: mcq.mcqs.map((q) => ({

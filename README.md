@@ -25,6 +25,10 @@ I was preparing for midterms and I had the idea to make a simple MCQ and Flashca
   - [X] Delete Option;
   - [X] Fix Navigation when modal is open;
   - [X] Edit the question;
+- Saving modifications in flashcards :
+  - [ ] Delete a single flashcard;
+  - [ ] Modify a single flashcard question and answer;
+  - [ ] Navigation with keyboard arrows;
 - [ ] If existing topic added, questions be added up.
 - [ ] Shuffle from different topics.
 - [X] Delete an individual question;
@@ -40,3 +44,4 @@ I was preparing for midterms and I had the idea to make a simple MCQ and Flashca
 - [ ] Fix small screens' UI.
 - [X] Upload your own quiz from a JSON file.
 - [ ] Adding current question index to the navigation.
+- [ ] Adding last score.

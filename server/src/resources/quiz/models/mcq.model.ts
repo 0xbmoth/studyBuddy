@@ -15,6 +15,10 @@ const mcqSchema = new Schema<MCQ>(
       type: [Number],
       required: true,
     },
+    explanation: {
+      type: String,
+      required: false
+    },
   },
   { _id: false },
 );
@@ -32,6 +36,10 @@ const mcqsSchema = new Schema(
     id: {
       type: String,
       default: () => new Types.ObjectId(),
+    },
+    score: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true },

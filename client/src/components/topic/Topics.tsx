@@ -5,11 +5,13 @@ import { ChevronDown, ChevronUp } from "react-feather";
 import { Trash } from "lucide-react";
 import DeleteTopic from "../modals/DeleteTopic";
 import DeleteCategory from "../modals/DeleteCategory";
+import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface TopicsProps {
   topics: Topic[];
   type: Output;
-  mcqLength: number;
+  mcqLength: number
 }
 
 export default function Topics({ type, topics }: TopicsProps) {
@@ -92,14 +94,17 @@ export default function Topics({ type, topics }: TopicsProps) {
                       setDel(true);
                       setTopicId(topic.id);
                     }}
-                    className="absolute bottom-2 right-2 bg-[#2A2A2A] p-1 rounded-full text-gray-400 hover:text-red-500 cursor-pointer material-symbols-outlined"
+                    className="absolute bottom-2 right-2 bg-[#2A2A2A] p-1 rounded-full text-gray-400 hover:text-red-500 cursor-pointer "
                   >
-                    delete
+                    <FontAwesomeIcon icon={faTrashCan} />
                   </span>
 
                   {/* Topic Details */}
                   <div onClick={() => handleTopicClick(topic)} className="cursor-pointer">
-                    <h3 className="text-lg font-bold mb-2">{topic.name}</h3>
+                    <div className="flex justify-between">
+                      <h3 className="text-lg font-bold mb-2">{topic.name}</h3>
+                      <h3>{topic.score}</h3>
+                    </div>
                     <div className="flex flex-col space-y-2">
                       <span className="text-sm text-gray-600 dark:text-gray-400">
                         Questions: {topic.numberOfQuestions + 1}

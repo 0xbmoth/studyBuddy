@@ -21,7 +21,6 @@ export const useMcqAttempt = (userId: string) => {
 
     try {
       const response = await axiosInstance.post("/attempt/mcq", { mcqAttempt });
-      console.log("MCQ attempt saved successfully:", response.data);
       return response.data;
     } catch (error) {
       console.error("Failed to save MCQ attempt:", error);
@@ -36,7 +35,6 @@ export const useMcqAttempt = (userId: string) => {
       const attemptsResponse = await axiosInstance.get(
         `/attempt/user/${userId}`
       );
-      console.log(attemptsResponse.data);
       return attemptsResponse.data;
     } catch (error) {
       console.error("Error fetching user attempts:", error);

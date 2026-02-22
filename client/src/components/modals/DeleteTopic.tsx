@@ -18,7 +18,6 @@ export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicPro
     const handleDelete = () => {
         axiosInstance.delete(`http://localhost:3000/api/${type == 'quiz' ? 'quiz' : 'flashcard'}/${topicId}`)
         .then(() => {
-            console.log("Topic Deleted Successfully!")
             setDel(false);
             dispatch({type: "DELETE_MCQS_TOPIC", payload: topicId})
             window.location.reload()

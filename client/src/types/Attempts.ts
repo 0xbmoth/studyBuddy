@@ -28,3 +28,9 @@ export interface FlashcardAttempt {
   knownCards: number;
   timestamp: Date;
 }
+
+export interface TitleStat {
+  name: string;
+  correct: number;
+  total: number;
+}

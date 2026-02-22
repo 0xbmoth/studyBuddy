@@ -14,6 +14,7 @@ import { EditQuestion } from "../../../../modals/EditQuestion";
 
 interface QuestionsProps {
     mcq: {
+        explanation: any;
         _id?: string;
         title: string;
         category: string;
@@ -22,6 +23,7 @@ interface QuestionsProps {
             question: string;
             options: string[];
             answers: number[];
+            explanation: string;
             answered?: boolean;
         }[];
         score: number
@@ -49,6 +51,9 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
     const [shouldEdit, setShouldEdit] = useState(false)
     const [editingQuestion, setEditingQuestion] = useState<EditingQuestion | null>(null);
+
+    const [submitted, setSubmitted] = useState(false);
+    const [explanation, setExplanation] = useState("")
 
     const isSample = useLocation().pathname === '/quiz-sample';
 
@@ -245,7 +250,11 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
         }
     }
 
-    const handleSubmit = (): void => {
+    const toggleExplanation = async () => {
+        setExplanation(mcq.explanation)
+    }
+
+    const handleSubmit = () : void => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
         const selectedForThisQuestion = selectedOptions[currentQuestion.id as string] || [];
         const isCorrect = selectedForThisQuestion.sort().toString() === currentQuestion.answers.sort().toString();
@@ -259,10 +268,14 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
         if (isCorrect) setScore(prev => prev + 1);
 
+        setSubmitted(true);
+
         currentQuestion.answered = true;
     };
 
     const handleNext = (): void => {
+        setSubmitted(false);
+
         if (currentQuestionIndex < mcq.mcqs.length - 1) {
             setCurrentQuestionIndex(prev => prev + 1);
             setIsSubmitted(false);
@@ -271,6 +284,8 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     };
 
     const handlePrevious = (): void => {
+        setSubmitted(false);
+
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(prev => prev - 1);
             setIsSubmitted(false);
@@ -323,6 +338,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 title: mcq.title,
                 category: mcq.category,
                 mcqs: mcq.mcqs,
+                explanation: mcq.explanation
             });
         } catch (error) {
             console.error("Failed to save quiz:", error);
@@ -419,7 +435,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                     onClick={handleAddOptionClick}
                     className="w-full p-3 border border-dashed border-gray-300 rounded-lg text-gray-500 dark:text-gray-400 hover:border-gray-500 hover:text-gray-700 transition-all flex items-center justify-center gap-2"
                 >
-                    <span className="material-symbols-outlined">add_circle</span>
+                    <span>+</span>
                     Add Option
                 </button>
             </div>
@@ -431,6 +447,23 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             >
                 Submit
             </button>
+
+            {submitted && 
+                <button
+                    onClick={() => toggleExplanation()}
+                    className="mt-4 bg-blue-500 py-3 px-6 rounded-lg w-full text-lg text-white disabled:bg-gray-300 disabled:dark:bg-zinc-500 disabled:cursor-not-allowed hover:bg-blue-600 transition-all"
+                >
+                    Explain
+                </button>
+            }
+
+            {
+                <div className="p-4">
+                    <p className="dark:text-white text-zinc-700">
+                        {mcq.mcqs[currentQuestionIndex].explanation}
+                    </p>
+                </div>
+            }
 
             <Navigation
                 currentIndex={currentQuestionIndex}

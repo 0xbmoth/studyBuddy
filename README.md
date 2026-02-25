@@ -44,4 +44,5 @@ I was preparing for midterms and I had the idea to make a simple MCQ and Flashca
 - [ ] Fix small screens' UI.
 - [X] Upload your own quiz from a JSON file.
 - [ ] Adding current question index to the navigation.
-- [ ] Adding last score.
+- [X] Adding last score.
+- [ ] Search among the MCQs for a topic. 

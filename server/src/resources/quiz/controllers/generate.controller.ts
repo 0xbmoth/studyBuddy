@@ -38,7 +38,7 @@ class GenerateController {
 
     const genAI = new GoogleGenerativeAI(this.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", 
+      model: "gemini-flash-latest", 
       generationConfig: {
         responseMimeType: "application/json",
         }
@@ -70,7 +70,7 @@ class GenerateController {
             "question": "Example question text?",
             "options": ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"],
             "answers": [1, 4], // count is from 0
-            "explanation": "Briefly explain why these are correct."
+            "explanation": "Briefly explain why each of the proposition is correct or incorrect, refer to the text but don't explicitly say that you are referring to it." 
           }
         ]
       }`;

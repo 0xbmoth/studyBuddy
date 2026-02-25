@@ -1,13 +1,14 @@
 import { MCQ } from "./mcq";
 
 export type QuestionUpload = {
-  proposition: string;
-  answers: string[];
-  correct: number[];
+  question: string;
+  options: string[];
+  answers: number[];
+  explanation: string
 };
 
 export type QuestionsUpload = {
-  questions: QuestionUpload[];
+  mcqs: QuestionUpload[];
 };
 
 export const transformQuestions = (
@@ -17,9 +18,10 @@ export const transformQuestions = (
 
   return questions.map((q, i) => ({
     id: `q-${Date.now()}-${i}`,
-    question: q.proposition,
-    options: q.answers,
-    answers: q.correct,
+    question: q.question,
+    options: q.options,
+    answers: q.answers,
     answered: false,
+    explanation: q.explanation
   }));
 };

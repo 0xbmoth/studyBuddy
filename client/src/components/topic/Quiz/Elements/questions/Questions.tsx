@@ -238,7 +238,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 title: mcq.title,
                 category: mcq.category,
                 mcqs: mcq.mcqs,
-                score: mcq.score
+                score: score
             },
             {
                 headers: {
@@ -268,6 +268,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
         if (isCorrect) setScore(prev => prev + 1);
 
+        console.log(isCorrect, score)
         setSubmitted(true);
 
         currentQuestion.answered = true;
@@ -338,7 +339,8 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 title: mcq.title,
                 category: mcq.category,
                 mcqs: mcq.mcqs,
-                explanation: mcq.explanation
+                explanation: mcq.explanation,
+                score: mcq.score
             });
         } catch (error) {
             console.error("Failed to save quiz:", error);
@@ -448,16 +450,8 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 Submit
             </button>
 
-            {submitted && 
-                <button
-                    onClick={() => toggleExplanation()}
-                    className="mt-4 bg-blue-500 py-3 px-6 rounded-lg w-full text-lg text-white disabled:bg-gray-300 disabled:dark:bg-zinc-500 disabled:cursor-not-allowed hover:bg-blue-600 transition-all"
-                >
-                    Explain
-                </button>
-            }
-
             {
+                mcq.mcqs[currentQuestionIndex].answered &&
                 <div className="p-4">
                     <p className="dark:text-white text-zinc-700">
                         {mcq.mcqs[currentQuestionIndex].explanation}

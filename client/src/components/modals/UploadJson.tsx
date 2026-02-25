@@ -53,7 +53,7 @@ export default function UploadJson({
         const fileContents = await readFileAsText(selectedFile);
         
         const jsonData: QuestionsUpload = JSON.parse(fileContents);
-        console.log(jsonData)
+        console.log("json data", jsonData)
 
         setExtractedText(jsonData)
         
@@ -92,8 +92,9 @@ export default function UploadJson({
     setCategory(form.category); 
     setTitle(form.topicName);
   
-    const mcqs = transformQuestions(extractedText?.questions || []);
+    const mcqs = transformQuestions(extractedText?.mcqs || []);
     
+    console.log("MCQQQS: ", mcqs)
     setQuiz(mcqs);
 
     const formattedData: MCQs = {
@@ -168,7 +169,7 @@ export default function UploadJson({
                       </button>
                       <button
                         type="submit"
-                        className="flex-1 mt-4 p-2 border-zinc-500 hover:bg-zinc-900 duration-300 border-2 rounded-lg"
+                        className="flex-1 mt-4 p-2 border-zinc-500 hover:bg-zinc-200 duration-300 border-2 rounded-lg"
                       >
                         {`Upload ${type === "quiz" ? "Quiz" : "Flashcards"}`}
                       </button>

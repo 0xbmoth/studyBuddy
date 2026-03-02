@@ -6,6 +6,7 @@ export type MCQ = {
   explanation: string;
   answered?: boolean;
   score?: number;
+  label?: string
 };
 
 export type MCQs = {
@@ -15,12 +16,6 @@ export type MCQs = {
   _id?: string;
   score?: number;
 };
-
-export interface EditingOption {
-  index: number;
-  text: string;
-  isCorrect: boolean;
-}
 
 export interface EditingQuestion {
   index: number;

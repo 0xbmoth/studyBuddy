@@ -4,6 +4,7 @@ interface ScoreDisplayProps {
     score: number;
     totalQuestions: number;
     onSaveAttempt: () => void;
+    savingAttempt: boolean;
     onStartOver: () => void;
 }
 
@@ -11,6 +12,7 @@ export const ScoreDisplay: FC<ScoreDisplayProps> = ({
     score,
     totalQuestions,
     onSaveAttempt,
+    savingAttempt,
     onStartOver
 }) => {
 
@@ -21,10 +23,11 @@ export const ScoreDisplay: FC<ScoreDisplayProps> = ({
             </div>
             <div className="mt-6">
                 <button
+                    disabled={savingAttempt}
                     onClick={onSaveAttempt}
-                    className="cursor-pointer bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
+                    className={`${savingAttempt ? "bg-gray-500" : "bg-green-500"} cursor-pointer text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all`}
                 >
-                    Save Attempt
+                    {savingAttempt ? "Saving Attempt" : "Save Attempt"}
                 </button>
                 <button
                     onClick={onStartOver}

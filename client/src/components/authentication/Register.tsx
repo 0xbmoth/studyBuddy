@@ -1,4 +1,4 @@
-import { useReducer, useState } from "react"
+import { useReducer, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import { getError } from "../../utils/api"
 import { ApiError } from "../../types/ApiError"
@@ -12,9 +12,12 @@ export default function Register() {
     const [username, setUsername] = useState("") 
     const [email, setEmail] = useState("") 
     const [password, setPassword] = useState("") 
-    const [confirmPassword, setConfirmPassword] = useState("") 
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const [state, dispatch] = useReducer(reducer, initialState)
+    const errorRef = useRef<HTMLDivElement>(null);
 
     if (state.user) {
         return <Navigate to="/dashboard" />;
@@ -22,9 +25,11 @@ export default function Register() {
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault()
+        setIsLoading(true);
         
         if (password !== confirmPassword) {
-            toast.error("Passwords Don't match")
+            toast.error("Passwords don't match!")
+            setIsLoading(false);
             return
         }
         await axiosInstance.post('/users/register', {
@@ -43,7 +48,14 @@ export default function Register() {
             
             window.location.href = `/dashboard`;
         })
-        .catch(err => console.log(getError(err as ApiError)))
+        .catch(err => {
+            setIsLoading(false);
+
+            const message = getError(err as ApiError);
+            setError(message);
+            
+            toast.error(message);
+        })
     }
 
     return (
@@ -51,6 +63,17 @@ export default function Register() {
             <p className="mt-3 text-xl text-center text-gray-600 dark:text-gray-200">
                 Welcome!
             </p>
+
+            {error && (
+                <div 
+                    ref={errorRef}
+                    tabIndex={-1}
+                    role="alert" 
+                    className="mt-4 p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 outline-none focus:ring-2 focus:ring-red-500"
+                >
+                    <span className="font-bold">Login failed:</span> {error}
+                </div>
+            )}
   
             <a href="" className="flex items-center justify-center mt-4 text-gray-600 transition-colors duration-300 transform border rounded-lg dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <div className="px-4 py-2">
@@ -99,8 +122,13 @@ export default function Register() {
                 </div>
 
                 <div className="mt-6">
-                    <button className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
-                        Sign Up
+                    <button 
+                        className={`w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50 ${
+                            isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-pink-700 hover:bg-pink-500"
+                        }`}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "We are signing you up..." : "Sign Up"}
                     </button>
                 </div>
     

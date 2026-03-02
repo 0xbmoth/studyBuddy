@@ -22,11 +22,12 @@ function validationMiddleware(Schema: Joi.Schema): RequestHandler {
             req.body = value;
             next();
         } catch (e: any) {
-            const errors: string[] = [];
-            e.details.forEach((error: Joi.ValidationErrorItem) => {
-                errors.push(error.message)
+            const errors = e.details.map((error: Joi.ValidationErrorItem) => error.message);
+            
+            res.status(400).json({
+                status: 400,
+                message: errors.join(', ')
             });
-            res.status(400).send({errors: errors})
         }
     }
 }

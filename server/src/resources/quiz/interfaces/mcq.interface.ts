@@ -10,5 +10,6 @@ export interface MCQ extends Document {
   question: string;
   options: string[];
   answers: number[];
-  explanation: string
+  explanation: string;
+  label: "Easy" | "Medium" | "Hard"
 }

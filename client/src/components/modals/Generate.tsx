@@ -99,7 +99,8 @@ export default function Generate({
               question: q.question,
               options: q.options,
               answers: q.answers,
-              explanation: q.explanation
+              explanation: q.explanation,
+              label: q.label
           })),
           title: form.topicName,
           category: form.category,
@@ -113,6 +114,7 @@ export default function Generate({
     } catch (error) {
       setLoading(false);
       setIsGenerating(false);
+      setIsGenerated(false);
       console.error("Error generating quiz/flashcards:", error);
     }
   }

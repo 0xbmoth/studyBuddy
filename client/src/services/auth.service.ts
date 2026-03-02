@@ -140,6 +140,7 @@ class AuthService {
       this.setTokens(response.data.token as TokenResponse);
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import authService from "../services/auth.service";
 
 interface UseAuthReturn {
@@ -18,6 +18,7 @@ export const useAuth = (): UseAuthReturn => {
       setIsAuthenticated(true);
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
@@ -25,6 +26,13 @@ export const useAuth = (): UseAuthReturn => {
     authService.logout();
     setIsAuthenticated(false);
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token && !isAuthenticated) {
+      setIsAuthenticated(true);
+    }
+  }, [isAuthenticated]);
 
   return { isAuthenticated, login, logout };
 };

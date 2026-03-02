@@ -6,6 +6,7 @@ import morgan from "morgan";
 import Controller from '@/utils/interfaces/controller.interface';
 import ErrorMiddleware from "@/middleware/error.middleware";
 import helmet from "helmet";
+import { exec } from "child_process";
 
 class App {
     public express!: Application;
@@ -51,6 +52,10 @@ class App {
     public listen(): void {
         this.express.listen(this.port, () => {
             console.log(`App listening on port ${this.port}`)
+
+            // const clientProcess = exec('npm run dev', { cwd: '../client' });
+
+            // clientProcess.stdout?.on('data', (data) => console.log(`[Client]: ${data}`));
         })
     }
 }

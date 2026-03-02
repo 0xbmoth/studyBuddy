@@ -1,8 +1,9 @@
-import { faBars, faBurger, faClose, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faClose, faMoon, faSignOutAlt, faSun } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useReducer, useState } from "react";
 import { getTheme } from "../../utils/theme";
 import { initialState, reducer } from "../../reducer/store";
+import { useAuth } from "../../hooks/useAuth";
 
 interface NavbarProps {
     isSidebarOpen: boolean,
@@ -11,13 +12,18 @@ interface NavbarProps {
 
 export default function Navbar({isSidebarOpen, toggleSidebar}: NavbarProps) {
     const [theme, setTheme] = useState<string>(getTheme())
+    const { logout } = useAuth();
     
     const checked = getTheme() === "light";
-
     const [, dispatch] = useReducer(reducer, initialState)
     
     const handleThemeSwitch = () => {
         setTheme(theme === "dark" ? "light" : "dark")
+    }
+
+    const handleLogout = async () => {
+        await logout();
+        window.location.href = "/login";
     }
 
     useEffect(() => {
@@ -54,6 +60,16 @@ export default function Navbar({isSidebarOpen, toggleSidebar}: NavbarProps) {
                 </span>
                 <span className="color-white">{(theme === "dark" && <FontAwesomeIcon icon={faSun} inverse />) || (theme === "light" && <FontAwesomeIcon icon={faSun}/>)}</span>
             </label>
+
+            {/* Logout */}
+            <button 
+                onClick={handleLogout}
+                className="flex items-center space-x-2 px-3 py-1.5 sm:border-dashed rounded-lg sm:bg-red-50 sm:dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all font-medium sm:border border-red-200 dark:border-red-800"
+                aria-label="Log out of your account"
+            >
+                <FontAwesomeIcon icon={faSignOutAlt} />
+                <span className="hidden sm:inline">Logout</span>
+            </button>
         </div>
     )
 }

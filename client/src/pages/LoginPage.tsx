@@ -3,7 +3,7 @@ import Login from "../components/authentication/Login"
 
 export default function LoginPage() {
   return (
-    <div className="bg-blue-100 h-screen">
+    <div className="bg-pink-100 h-screen">
       <Helmet>
         <title>Login</title>
       </Helmet>
@@ -12,7 +12,7 @@ export default function LoginPage() {
           <img src="login.jpg" alt="study case" /></div>
           <div className="w-full px-6 py-8 md:px-8 lg:w-1/2">
               <div className="flex justify-center mx-auto">
-                  <img className="w-auto h-7 sm:h-8" src="login.png" alt=""/>
+                  <img className="w-auto h-7 sm:h-8" src="/gifs/computer.gif" alt=""/>
               </div>
               <Login/>
           </div>

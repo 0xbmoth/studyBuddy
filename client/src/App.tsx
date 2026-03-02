@@ -11,7 +11,10 @@ export default function App() {
   return (
     <StateContext.Provider value={{ state, dispatch }}>
       <div>
-        <ToastContainer position="bottom-center" limit={4} />
+        <ToastContainer 
+          position="bottom-center" 
+          hideProgressBar={false}
+          limit={4} />
         <Outlet />
       </div>
     </StateContext.Provider>

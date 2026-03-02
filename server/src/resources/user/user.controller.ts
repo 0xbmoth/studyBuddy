@@ -38,27 +38,6 @@ class UserController implements Controller {
     this.router.post(`${this.path}/refresh`, this.refreshToken);
   }
 
-  private register = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<Response | void> => {
-    try {
-      const { username, email, password } = req.body;
-
-      const token = await this.UserService.register(
-        username,
-        email,
-        password,
-        "user",
-      );
-
-      res.status(201).json({ token });
-    } catch (error) {
-      next(new HttpException(400, (error as Error).message));
-    }
-  };
-
   private refreshToken = async (
     req: Request,
     res: Response,
@@ -98,12 +77,42 @@ class UserController implements Controller {
       const token = await this.UserService.login(email, password, req);
 
       res.status(200).json({ token });
-    } catch (error) {
-      next(new HttpException(400, (error as Error).message));
+    } catch (error: any) {
+        if (error instanceof HttpException) {
+            return next(error);
+        }
+
+        next(new HttpException(400, error.message || 'Unable to log in'));
     }
   };
 
-  // single page application, req user again to see if it's up to date
+  private register = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<Response | void> => {
+    try {
+      const { username, email, password } = req.body;
+
+      console.log(req.body)
+
+      const token = await this.UserService.register(
+        username,
+        email,
+        password,
+        "user",
+      );
+
+      res.status(201).json({ token });
+    } catch (error: any) {
+       if (error instanceof HttpException) {
+            return next(error);
+        }
+
+        next(new HttpException(400, error.message || 'Unable to register'));
+    }
+  };
+
   private getUser = (
     req: Request,
     res: Response,

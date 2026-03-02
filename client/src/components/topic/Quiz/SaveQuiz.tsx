@@ -28,7 +28,7 @@ export default function SaveQuiz({title, category, mcqs}: SaveProps) {
                 });
             setSaved(true);
             dispatch({type: "ADD_MCQS", payload: {title, category, mcqs}})
-        } catch (error) {
+        } catch (error: any) {
             setLoading(false)
             if (error.response) {
                 setError(true)

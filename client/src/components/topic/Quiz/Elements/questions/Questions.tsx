@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, FC, useEffect } from "react";
-import { AddingOption, EditingOption, EditingQuestion, MCQ, MCQs } from "../../../../../types/mcq";
+import { useState, FC, useEffect, useRef } from "react";
+import { AddingOption, MCQ, MCQs } from "../../../../../types/mcq";
 import { axiosInstance } from "../../../../../services/auth.service";
 import { ScoreDisplay } from "./DisplayScore";
 import { QuestionOption } from "./QuestionOption";
@@ -8,7 +8,6 @@ import { Navigation } from "./Navigation";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Edit, X } from "lucide-react";
 import { AddOption } from "../../../../modals/AddOption";
-import { EditOption } from "../../../../modals/EditOption";
 import DeleteQuestion from "../../../../modals/DeleteQuestion";
 import { EditQuestion } from "../../../../modals/EditQuestion";
 
@@ -25,6 +24,7 @@ interface QuestionsProps {
             answers: number[];
             explanation: string;
             answered?: boolean;
+            label?: string
         }[];
         score: number
     };
@@ -39,21 +39,21 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const [score, setScore] = useState<number>(0);
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
     const [selectedOptions, setSelectedOptions] = useState<Record<string, number[]>>({});
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+
+    const currentQuestionIndexRef = useRef(0);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(currentQuestionIndexRef.current);
+    
     const [, setAnswered] = useState<number>(0);
-    const [editingOption, setEditingOption] = useState<EditingOption | null>(null);
     const [addingOption, setAddingOption] = useState<AddingOption | null>(null);
-    const [, setSavingQuestion] = useState<boolean>(false);
-    const [canMove, setCanMove] = useState(true)
+    const [savingQuestion, setSavingQuestion] = useState<boolean>(false);
+    const [canMove, setCanMove] = useState(true);
+    const [savingAttempt, setSavingAttempt] = useState(false);
     
     const [deleteQuestion, setDeleteQuestion] = useState(false)
     const [shouldDelete, setShouldDelete] = useState(false)
 
     const [shouldEdit, setShouldEdit] = useState(false)
-    const [editingQuestion, setEditingQuestion] = useState<EditingQuestion | null>(null);
-
-    const [submitted, setSubmitted] = useState(false);
-    const [explanation, setExplanation] = useState("")
+    const [editingQuestion, setEditingQuestion] = useState(false);
 
     const isSample = useLocation().pathname === '/quiz-sample';
 
@@ -71,35 +71,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 ? selectedForThisQuestion.filter(i => i !== index)
                 : [...selectedForThisQuestion, index]
         }));
-    };
-
-    const handleEditOption = (index: number): void => {
-        const currentQuestion = mcq.mcqs[currentQuestionIndex];
-        setEditingOption({
-            index,
-            text: currentQuestion.options[index],
-            isCorrect: currentQuestion.answers.includes(index)
-        });
-
-        if (!location.pathname.includes("sample-quiz")) saveChanges();
-    };
-
-    const handleSaveOption = async () => {
-        setCanMove(true);
-        
-        if (!editingOption) return;
-
-        const currentQuestion = mcq.mcqs[currentQuestionIndex];
-        const { index, text, isCorrect } = editingOption;
-
-        currentQuestion.options[index] = text;
-        currentQuestion.answers = isCorrect 
-            ? [...new Set([...currentQuestion.answers, index])]
-            : currentQuestion.answers.filter(i => i !== index);
-
-        setEditingOption(null);
-
-        if (!location.pathname.includes("sample-quiz")) saveChanges();
     };
 
     useEffect(() => {
@@ -156,18 +127,12 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
         setCanMove(true);
     }
 
-    const handleEditQuestion = async (question: string) => {
+    const handleEditQuestion = async (updatedQuestion: MCQ) => {
         setShouldEdit(true);
-
-        const toEdit = mcq.mcqs[currentQuestionIndex]
-
-        if (!toEdit) return;
-
-        toEdit.question = question;
         
         const updatedMcqs = [
             ...mcq.mcqs.slice(0, currentQuestionIndex),
-            toEdit,
+            updatedQuestion,
             ...mcq.mcqs.slice(currentQuestionIndex + 1)
         ]
 
@@ -176,17 +141,12 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             mcqs: updatedMcqs
         })
 
-        setEditingQuestion(null);
-
+        setEditingQuestion(false);
         setCanMove(true);
     }
 
     const handleEditQuestionClick = (): void => {
-        const currentQuestion = mcq.mcqs[currentQuestionIndex];
-        setEditingQuestion({
-            index: currentQuestionIndex,
-            text: currentQuestion.question
-        })
+        setEditingQuestion(true)
     }
 
     const handleAddOptionClick = (): void => {
@@ -249,11 +209,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             console.log(err)
         }
     }
-
-    const toggleExplanation = async () => {
-        setExplanation(mcq.explanation)
-    }
-
+    
     const handleSubmit = () : void => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
         const selectedForThisQuestion = selectedOptions[currentQuestion.id as string] || [];
@@ -268,27 +224,22 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
         if (isCorrect) setScore(prev => prev + 1);
 
-        console.log(isCorrect, score)
-        setSubmitted(true);
-
         currentQuestion.answered = true;
     };
 
     const handleNext = (): void => {
-        setSubmitted(false);
-
         if (currentQuestionIndex < mcq.mcqs.length - 1) {
             setCurrentQuestionIndex(prev => prev + 1);
+            currentQuestionIndexRef.current += 1;
             setIsSubmitted(false);
             setSelectedOptions({});
         }
     };
 
     const handlePrevious = (): void => {
-        setSubmitted(false);
-
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(prev => prev - 1);
+            currentQuestionIndexRef.current -= 1;
             setIsSubmitted(false);
         }
     };
@@ -337,7 +288,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
         try {
             await axiosInstance.post("/quiz", {
                 title: mcq.title,
-                category: mcq.category,
+                category: mcq.category[0].toLocaleUpperCase() + mcq.category.substring(1),
                 mcqs: mcq.mcqs,
                 explanation: mcq.explanation,
                 score: mcq.score
@@ -356,6 +307,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 score={score}
                 totalQuestions={mcq.mcqs.length}
                 onSaveAttempt={handleSaveAttempt}
+                savingAttempt={savingAttempt}
                 onStartOver={handleStartOver}
             />
         );
@@ -363,15 +315,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
     return (
         <div className={`${answers[currentQuestionIndex] != undefined ? answers[currentQuestionIndex] ? "border-t-8 border-t-green-600 dark:border-t-green-600" : "border-t-8 border-t-red-600 dark:border-t-red-600" : ""} max-w-4xl mx-auto p-6 bg-white dark:bg-[#1f1f1f] rounded-xl shadow-lg border border-gray-300 dark:border-transparent`}>
-            {editingOption && (
-                <EditOption
-                    editingOption={editingOption}
-                    onClose={() => {setCanMove(true); setEditingOption(null)}}
-                    onSave={handleSaveOption}
-                    setEditingOption={setEditingOption}
-                />
-            )}
-
             {addingOption && (
                 <AddOption
                     addingOption={addingOption}
@@ -393,10 +336,9 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
             {editingQuestion && (
                 <EditQuestion 
-                    editingQuestion={editingQuestion}
-                    setEditingQuestion={setEditingQuestion}
+                    questionData={mcq.mcqs[currentQuestionIndex]}
+                    onClose={() => { setCanMove(true); setEditingQuestion(false) }}
                     onSave={handleEditQuestion}
-                    onClose={() => { setCanMove(true); setEditingQuestion(null) }}
                 />
             )}
 
@@ -411,8 +353,14 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 </div>
             </div>
 
-            <div className="mb-6 flex justify-between">
-                <p className="text-xl font-semibold text-gray-700 dark:text-gray-300">{mcq.mcqs[currentQuestionIndex].question}</p>
+            {/* label */}
+            <span className="text-[10px] font-bold uppercase px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md">
+                {mcq.mcqs[currentQuestionIndex].label || "No label"}
+            </span>
+
+            <div className="mt-2 mb-6 flex justify-between">
+                <p 
+                    className="text-xl font-semibold text-gray-700 dark:text-gray-300">{mcq.mcqs[currentQuestionIndex].question}</p>
                 <Edit 
                     onClick={() => { setCanMove(false); handleEditQuestionClick() }}
                     className="dark:text-gray-300 mt-1 cursor-pointer hover:text-gray-500" />
@@ -428,7 +376,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                         isCorrectAnswer={isCorrectAnswer(index)}
                         isSelected={selectedOptions[mcq.mcqs[currentQuestionIndex].id]?.includes(index)}
                         onOptionClick={() => handleOptionClick(index)}
-                        onEditClick={() => {setCanMove(false); handleEditOption(index)}}
                         onDeleteClick={(e) => handleDeleteOption(index, e)}
                     />
                 ))}
@@ -445,19 +392,23 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             <button
                 onClick={handleSubmit}
                 disabled={!selectedOptions[mcq.mcqs[currentQuestionIndex].id]?.length || isSubmitted || answers[currentQuestionIndex] !== undefined}
-                className="mt-4 bg-blue-500 py-3 px-6 rounded-lg w-full text-lg text-white disabled:bg-gray-300 disabled:dark:bg-zinc-500 disabled:cursor-not-allowed hover:bg-blue-600 transition-all"
+                className="mt-4 bg-pink-500 py-3 px-6 rounded-lg w-full text-lg text-white disabled:bg-gray-300 disabled:dark:bg-zinc-500 disabled:cursor-not-allowed hover:bg-pink-600 transition-all"
             >
                 Submit
             </button>
 
-            {
-                mcq.mcqs[currentQuestionIndex].answered &&
-                <div className="p-4">
-                    <p className="dark:text-white text-zinc-700">
+            {mcq.mcqs[currentQuestionIndex].answered && (
+                <div className="mt-6 p-5 bg-pink-50 dark:bg-pink-900/20 border-l-4 border-pink-500 rounded-r-xl animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400">
+                            Explanation
+                        </span>
+                    </div>
+                    <p className="text-zinc-700 dark:text-gray-200 leading-relaxed text-sm md:text-base">
                         {mcq.mcqs[currentQuestionIndex].explanation}
                     </p>
                 </div>
-            }
+            )}
 
             <Navigation
                 currentIndex={currentQuestionIndex}
@@ -468,6 +419,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 onNext={handleNext}
                 onShowScore={handleShowScore}
                 onSaveQuiz={handleSaveQuestion}
+                savingQuestion={savingQuestion}
                 canMove={canMove}
             />
         </div>

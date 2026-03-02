@@ -9,6 +9,7 @@ interface NavigationProps {
     onNext: () => void;
     onShowScore: () => void;
     onSaveQuiz: () => void;
+    savingQuestion: boolean;
     canMove: boolean,
 }
 
@@ -20,6 +21,7 @@ export const Navigation: FC<NavigationProps> = ({
     onNext,
     onShowScore,
     onSaveQuiz,
+    savingQuestion,
     canMove
 }) => {
     useEffect(() => {
@@ -57,10 +59,10 @@ export const Navigation: FC<NavigationProps> = ({
                 )}
                 {isSample && (
                     <button 
-                        className="bg-green-300 border-2 border-green-500 px-2 rounded-md text-green-700"
+                        className="bg-pink-300 border-2 border-pink-500 dark:border-0 px-2 rounded-md text-pink-700"
                         onClick={onSaveQuiz}
                     >
-                        Save Quiz
+                        {savingQuestion ? "Saving..." : "Save quiz"}
                     </button>
                 )}
                 {currentIndex < totalQuestions - 1 && 

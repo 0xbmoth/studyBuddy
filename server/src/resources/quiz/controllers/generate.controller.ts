@@ -70,7 +70,8 @@ class GenerateController {
             "question": "Example question text?",
             "options": ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"],
             "answers": [1, 4], // count is from 0
-            "explanation": "Briefly explain why each of the proposition is correct or incorrect, refer to the text but don't explicitly say that you are referring to it." 
+            "explanation": "Briefly explain why each of the proposition is correct or incorrect, refer to the text but don't explicitly say that you are referring to it, explain the why's and don't be shallow." 
+            "label": "Judge the difficulty of the question: Easy or Medium or Hard"
           }
         ]
       }`;

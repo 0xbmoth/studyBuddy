@@ -19,6 +19,10 @@ const mcqSchema = new Schema<MCQ>(
       type: String,
       required: false
     },
+    label: {
+      type: String,
+      required: false
+    }
   },
   { _id: false },
 );

@@ -19,12 +19,26 @@ class UserService {
   ): Promise<TokenResponse | Error> {
     try {
       const user = await this.user.create({ username, email, password, role });
+      console.log(user)
 
       const accessToken = token.createToken(user);
 
       return accessToken;
-    } catch (error) {
-      throw new HttpException(400, (error as Error).message);
+    } catch (error: any) {
+      /* Duplicate Email/Username (MongoDB Error 11000). */
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyPattern)[0];
+        throw new HttpException(409, `That ${field} is already in use.`);
+      }
+
+      /* Mongoose Validation Errors (e.g., password too short). */
+      if (error.name === 'ValidationError') {
+        const message = Object.values(error.errors).map((val: any) => val.message).join(', ');
+        throw new HttpException(400, message);
+      }
+
+      /* Fallback for unexpected errors. */
+      throw new HttpException(400, "Unable to create account. Please try again later.");
     }
   }
 
@@ -36,20 +50,24 @@ class UserService {
     email: string,
     password: string,
     req: Request,
-  ): Promise<TokenResponse | Error> {
+  ): Promise<TokenResponse> {
     try {
       const user = await this.user.findOne({ email: email });
 
-      if (!user) throw new Error("Unable to find a user with that email");
+      if (!user) throw new HttpException(404, "Unable to find a user with that email");
 
-      if (await user.isValidPassword(password)) {
+      const isPasswordValid = await user.isValidPassword(password);
+
+      if (isPasswordValid) {
         // @ts-ignore
         req.user = user;
         const tokens: TokenResponse = token.createToken(user);
         return tokens;
-      } else throw new Error("Incorrect Password");
+      } else throw new HttpException(401, "Incorrect Password");
     } catch (error) {
-      throw new Error("Unable to login user");
+      if (error instanceof HttpException) throw error;
+
+      throw new HttpException(500, "Internal Server Error during login");
     }
   }
 

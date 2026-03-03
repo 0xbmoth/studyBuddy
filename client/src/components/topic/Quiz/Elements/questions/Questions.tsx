@@ -10,6 +10,8 @@ import { Edit, X } from "lucide-react";
 import { AddOption } from "../../../../modals/AddOption";
 import DeleteQuestion from "../../../../modals/DeleteQuestion";
 import { EditQuestion } from "../../../../modals/EditQuestion";
+import { useApp } from "../../../../../context/context";
+import { toast } from "react-toastify";
 
 interface QuestionsProps {
     mcq: {
@@ -48,6 +50,8 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const [savingQuestion, setSavingQuestion] = useState<boolean>(false);
     const [canMove, setCanMove] = useState(true);
     const [savingAttempt, setSavingAttempt] = useState(false);
+
+    const { dispatch } = useApp();
     
     const [deleteQuestion, setDeleteQuestion] = useState(false)
     const [shouldDelete, setShouldDelete] = useState(false)
@@ -293,6 +297,10 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 explanation: mcq.explanation,
                 score: mcq.score
             });
+
+            dispatch({type: "ADD_MCQS", payload: mcq})
+
+            toast.success("MCQs created succesfully!")
         } catch (error) {
             console.error("Failed to save quiz:", error);
         } finally {

@@ -1,51 +1,59 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
 import Topics from "../components/topic/Topics";
-import { Topic } from "../types/Topic";
 import { MCQ, MCQs } from "../types/mcq";
 import { axiosInstance } from "../services/auth.service";
 import { Upload } from "lucide-react";
 import UploadJson from "../components/modals/UploadJson";
 import Generate from "../components/modals/Generate";
-import { StateContext } from "../context/context";
+import { useApp } from "../context/context";
 
 export default function QuizPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [quiz, setQuiz] = useState<MCQ[]>();
   const [loading, setLoading] = useState(false);
+  const [quiz, setQuiz] = useState<MCQ[]>();
   const [, setTitle] = useState("");
   const [, setCategory] = useState("");
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [quizId, ] = useState("")
   const [mcq, setMcq] = useState<MCQs>();
-  const { state, dispatch } = useContext(StateContext);
+  const { state, dispatch } = useApp();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
   
   useEffect(() => {
+    if (state.mcqs.length > 0) {
+      const selectMcq = state.mcqs.find((m: MCQs) => m._id === quizId);
+      setMcq(selectMcq);
+      return;
+    }
+
     axiosInstance.get(`/quiz`)
     .then((response) => {
-      const mcqs = response.data.mcq
-      const userTopics: Topic[] = mcqs.map((mcq: MCQs) => ({
-        name: mcq.title,
-        category: mcq.category,
-        numberOfQuestions: mcq.mcqs?.length - 1,
-        id: mcq._id,
-        score: `${mcq.score}/${mcq.mcqs.length}`
-      }))
+      const mcqsRaw = response.data.mcq;
 
-      const selectMcq: MCQs = mcqs.find((mcq: MCQs) => mcq._id === quizId)
-      setMcq(selectMcq)
+      const sortedMcqs = mcqsRaw.sort((x: any, y: any) => 
+        new Date(y.updatedAt).getTime() - new Date(x.updatedAt).getTime()
+      );
 
-      dispatch({type: "GET_MCQS", payload: mcqs})
+      const userTopics = sortedMcqs.map((m: any) => ({
+        name: m.title,
+        category: m.category,
+        numberOfQuestions: m.mcqs?.length || 0,
+        id: m._id,
+        score: `${m.score || 0}/${m.mcqs?.length || 0}`
+      }));
+
+      dispatch({type: "GET_MCQS", payload: sortedMcqs})
       dispatch({type: 'GET_MCQS_TOPIC', payload: userTopics})
     }).catch((err) => console.log(err))
-  }, [quizId])
+    
+  }, [])
 
   return (
     <div className="font-mono dark:bg-[#111111] bg-white min-h-screen overflow-x-hidden">
@@ -86,7 +94,7 @@ export default function QuizPage() {
           </div>
 
           <p className="text-xl mt-4 ml-4">Your topics:</p>
-          {state.mcqsTopics && <Topics mcqLength={mcq && mcq.mcqs ? mcq.mcqs.length : 0} type='quiz' topics={state.mcqsTopics} />}
+          {state.mcqsTopics && <Topics mcqLength={mcq && mcq.mcqs ? mcq.mcqs.length : 0} type='quiz' />}
 
           <Generate
             type="quiz"
@@ -107,8 +115,6 @@ export default function QuizPage() {
             setIsOpen={setIsUploadOpen}
             setCategory={setCategory}
             setTitle={setTitle}
-            setQuiz={setQuiz}
-            quiz={quiz}
             type="quiz"  
           />
 

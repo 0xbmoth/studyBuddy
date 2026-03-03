@@ -35,6 +35,8 @@ class QuizController implements Controller {
     );
 
     this.router.put(`${this.path}/:id`, authenticatedMiddleware, this.editMcq);
+
+    this.router.put(`${this.path}/category/:id`, authenticatedMiddleware, this.editMcqCategory)
   }
 
   private postMcq = async (req: Request, res: Response, next: NextFunction) => {
@@ -136,6 +138,19 @@ class QuizController implements Controller {
         req.body;
 
       await this.McqService.edit(mcqId, title, mcqs, category, score);
+
+      res.status(200).json("quiz Deleted Successfully");
+    } catch (err) {
+      next(new HttpException(400, (err as Error).message));
+    }
+  };
+
+  private editMcqCategory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const mcqId = req.params.id;
+      const { category } = req.body;
+
+      await this.McqService.changeCategory(mcqId, category);
 
       res.status(200).json("quiz Deleted Successfully");
     } catch (err) {

@@ -23,13 +23,25 @@ const theme = localStorage.getItem("theme")
   ? localStorage.getItem("theme")!
   : getTheme();
 
+const localMcqs = localStorage.getItem("mcqs") 
+  ? JSON.parse(localStorage.getItem("mcqs")!) 
+  : [];
+
+const localMcqTopics = localStorage.getItem("mcqsTopics") 
+  ? JSON.parse(localStorage.getItem("mcqsTopics")!) 
+  : [];
+
+const localFlashcardTopics = localStorage.getItem("flashcardTopics") 
+  ? JSON.parse(localStorage.getItem("flashcardTopics")!) 
+  : [];
+
 export const initialState: AppState = {
   user: user ? (user as User) : null,
   theme: theme ? theme : "light",
   flashcards: [],
-  mcqs: [],
-  flashcardsTopics: [],
-  mcqsTopics: [],
+  mcqs: localMcqs,
+  flashcardsTopics: localFlashcardTopics,
+  mcqsTopics: localMcqTopics,
 };
 
 export type Action =
@@ -46,7 +58,8 @@ export type Action =
   | { type: "DELETE_MCQS_TOPIC"; payload: string }
   | { type: "ADD_MCQS"; payload: MCQs }
   | { type: "REMOVE_MCQS"; payload: MCQs }
-  | { type: "SET_SCORE"; payload: TitleStat[] };
+  | { type: "SET_SCORE"; payload: TitleStat[] }
+  | { type: "UPDATE_MCQ_CATEGORY", payload: { id: string, category: string } }
 
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -54,7 +67,9 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, user: action.payload };
     case "USER_SIGNOUT":
       localStorage.removeItem("token");
-      return { ...state, user: null };
+      localStorage.removeItem("mcqs");
+      localStorage.removeItem("mcqsTopics");
+      return { ...state, user: null, mcqs: [], mcqsTopics: [] };
     case "CHANGE_THEME":
       localStorage.setItem("theme", action.payload);
       return { ...state, theme: action.payload };
@@ -73,19 +88,55 @@ export function reducer(state: AppState, action: Action): AppState {
     case "REMOVE_FLASHCARDS":
       return { ...state, flashcards: [...state.flashcards, action.payload] };
     case "GET_MCQS":
+      localStorage.setItem("mcqs", JSON.stringify(action.payload));
       return { ...state, mcqs: action.payload };
     case "GET_MCQS_TOPIC":
+      localStorage.setItem("mcqsTopics", JSON.stringify(action.payload));
       return { ...state, mcqsTopics: action.payload };
     case "DELETE_MCQS_TOPIC": {
-      const topics: Topic[] = state.mcqsTopics.filter(
+      const filteredTopics = state.mcqsTopics.filter(
         (topic) => topic.id !== action.payload
       );
-      return { ...state, mcqsTopics: topics };
+      localStorage.setItem("mcqsTopics", JSON.stringify(filteredTopics));
+
+      return { ...state, mcqsTopics: filteredTopics };
     }
     case "ADD_MCQS":
-      return { ...state, mcqs: [...state.mcqs, action.payload] };
+      const newQuiz = action.payload;
+      const updatedMcqs = [...state.mcqs, newQuiz];
+
+      const newTopic: Topic = {
+        name: newQuiz.title,
+        category: newQuiz.category,
+        numberOfQuestions: newQuiz.mcqs?.length || 0,
+        id: newQuiz._id || Math.random().toString(),
+        score: `0/${newQuiz.mcqs?.length || 0}`
+      };
+
+      const updatedTopics = [newTopic, ...state.mcqsTopics];
+      
+      localStorage.setItem("mcqs", JSON.stringify(updatedMcqs))
+      localStorage.setItem("mcqsTopics", JSON.stringify(updatedTopics));
+
+      return { ...state, mcqs: updatedMcqs, mcqsTopics: updatedTopics };
     case "REMOVE_MCQS":
       return { ...state, mcqs: [...state.mcqs, action.payload] };
+
+    case "UPDATE_MCQ_CATEGORY":
+      return {
+        ...state,
+        mcqs: state.mcqs.map((item: any) =>
+          item._id === action.payload.id
+            ? { ...item, category: action.payload.category }
+            : item
+        ),
+        
+        mcqsTopics: state.mcqsTopics.map((topic: any) =>
+          topic.id === action.payload.id
+            ? { ...topic, category: action.payload.category }
+            : topic
+        ),
+      };
     default:
       return state;
   }

@@ -50,7 +50,7 @@ class GenerateController {
       You are an expert Professor in ${module}. Your task is to create a high-level academic assessment for ${subject}.
 
       ### TASK
-      Generate exactly ${n} difficult Multiple-Response Questions (MRQs) in ${language} based STRICTLY on the text provided below. 
+      Generate exactly ${n} Multiple-Response Questions (MRQs), of different difficulty levels, in ${language} based STRICTLY on the text provided below. 
 
       ### RULES
       1. Each question MUST have exactly 5 options.
@@ -71,7 +71,7 @@ class GenerateController {
             "options": ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"],
             "answers": [1, 4], // count is from 0
             "explanation": "Briefly explain why each of the proposition is correct or incorrect, refer to the text but don't explicitly say that you are referring to it, explain the why's and don't be shallow." 
-            "label": "Judge the difficulty of the question: Easy or Medium or Hard"
+            "label": "Judge the difficulty of each question alone, don't put the same difficulty label on every question: Easy or Medium or Hard"
           }
         ]
       }`;
@@ -107,13 +107,28 @@ class GenerateController {
       const prompt = type == "quiz" ? promptMcq : promptFlashcards;
 
       const result = await model.generateContent(prompt);
-      const text = result.response.text();
+      let text = result.response.text();
+
+      const jsonMatch = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+      if (jsonMatch) {
+        text = jsonMatch[0];
+      }
 
       const data = JSON.parse(text);
+
+      if (!data.questions || !Array.isArray(data.questions)) {
+        throw new Error("Invalid structure: 'questions' array is missing.");
+      }
+
       res.json({ aiResponse: data });
-    } catch (err) {
-      console.log(err)
-      next(new HttpException(400, (err as Error).message));
+    } catch (err: any) {
+      console.error("AI processing error:", err);
+
+      const message = err instanceof SyntaxError 
+        ? "AI returned malformed JSON. Please try again." 
+        : err.message;
+
+      next(new HttpException(400, message));
     }
   };
 

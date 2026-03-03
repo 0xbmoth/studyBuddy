@@ -19,7 +19,6 @@ class UserService {
   ): Promise<TokenResponse | Error> {
     try {
       const user = await this.user.create({ username, email, password, role });
-      console.log(user)
 
       const accessToken = token.createToken(user);
 

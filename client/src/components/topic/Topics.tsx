@@ -5,17 +5,19 @@ import { ChevronDown, ChevronUp } from "react-feather";
 import { Trash } from "lucide-react";
 import DeleteTopic from "../modals/DeleteTopic";
 import DeleteCategory from "../modals/DeleteCategory";
-import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { faExchange, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useApp } from "../../context/context";
+import MoveTopic from "../modals/MoveTopic";
 
 interface TopicsProps {
-  topics: Topic[];
   type: Output;
   mcqLength: number
 }
 
-export default function Topics({ type, topics }: TopicsProps) {
+export default function Topics({ type }: TopicsProps) {
   const [del, setDel] = useState<boolean>(false);
+  const [move, setMove] = useState<boolean>(false);
   const [topicId, setTopicId] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
@@ -25,6 +27,9 @@ export default function Topics({ type, topics }: TopicsProps) {
   const [isDeleteCategoryModalOpen, setIsDeleteCategoryModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState("");
 
+  const { state, } = useApp();
+
+  const topics = type == "quiz" ? state.mcqsTopics : state.flashcardsTopics
   const groupedTopics = topics.reduce((acc, topic) => {
     acc[topic.category] = acc[topic.category] || [];
     acc[topic.category].push(topic);
@@ -88,16 +93,30 @@ export default function Topics({ type, topics }: TopicsProps) {
                   key={topic.id}
                   className="relative border-pink-500 border-2 p-4 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg hover:shadow-xl transition-all"
                 >
-                  {/* Delete Button */}
-                  <span
-                    onClick={() => {
-                      setDel(true);
-                      setTopicId(topic.id);
-                    }}
-                    className="absolute bottom-2 right-2 bg-[#2A2A2A] p-1 rounded-full text-gray-400 hover:text-red-500 cursor-pointer "
-                  >
-                    <FontAwesomeIcon icon={faTrashCan} />
-                  </span>
+                  <div className="flex gap-2 absolute bottom-2 right-2 ">
+                    {/* Delete Button */}
+                    <span
+                      onClick={() => {
+                        setDel(true);
+                        setTopicId(topic.id);
+                      }}
+                      className="dark:bg-[#2A2A2A] p-1 rounded-full text-gray-400 hover:text-red-500 cursor-pointer "
+                    >
+                      <FontAwesomeIcon icon={faTrashCan} />
+                    </span>
+
+                    {/* Move Button */}
+                    <span
+                      onClick={() => {
+                        setMove(true);
+                        setTopicId(topic.id);
+                      }}
+                      className="dark:bg-[#2A2A2A] p-1 rounded-full text-gray-400 hover:text-green-500 cursor-pointer "
+                    >
+                      <FontAwesomeIcon icon={faExchange} />
+                    </span>
+                  </div>
+                 
 
                   {/* Topic Details */}
                   <div onClick={() => handleTopicClick(topic)} className="cursor-pointer">
@@ -119,6 +138,9 @@ export default function Topics({ type, topics }: TopicsProps) {
       ))}
 
       <DeleteTopic type={type} topicId={topicId} setDel={setDel} del={del} />
+
+      {/* Change Category */}
+      <MoveTopic topicId={topicId} setMove={setMove} move={move} />
 
       <DeleteCategory
         del={isDeleteCategoryModalOpen}

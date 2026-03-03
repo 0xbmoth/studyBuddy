@@ -7,6 +7,7 @@ export type MCQ = {
   answered?: boolean;
   score?: number;
   label?: string
+  updatedAt?: string
 };
 
 export type MCQs = {

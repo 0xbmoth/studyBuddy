@@ -1,5 +1,6 @@
 import { Modal } from "@mui/material";
 import { axiosInstance } from "../../services/auth.service";
+import { useApp } from "../../context/context";
 
 interface DeleteCategoryProps {
     del: boolean;
@@ -8,11 +9,14 @@ interface DeleteCategoryProps {
 }
 
 export default function DeleteCategory({del, setDel, category}: DeleteCategoryProps) {
+    const { dispatch } = useApp()
     const deleteCategory = () => {
         axiosInstance.delete(`http://localhost:3000/api/quiz/delete-category/${category}`)
             .then(() => {
                 setDel(false);
+
                 window.location.reload();
+                dispatch({type: "DELETE_MCQS_TOPIC", payload: category})
             })
             .catch((err) => console.log(err))
     }

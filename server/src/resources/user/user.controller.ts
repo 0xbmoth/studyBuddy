@@ -94,8 +94,6 @@ class UserController implements Controller {
     try {
       const { username, email, password } = req.body;
 
-      console.log(req.body)
-
       const token = await this.UserService.register(
         username,
         email,
@@ -152,8 +150,6 @@ class UserController implements Controller {
           .status(201)
           .json({ message: "Title added successfully", title });
       } catch (saveError) {
-        console.log("Error in post title:", saveError);
-
         return next(new HttpException(500, (saveError as Error).message));
       }
     } catch (error) {

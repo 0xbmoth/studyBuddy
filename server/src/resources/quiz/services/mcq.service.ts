@@ -80,12 +80,37 @@ export default class McqService {
         .exec();
 
       if (!mcq) {
-        throw new Error("Flashcard not found");
+        throw new Error("MCQ not found");
       }
 
       return "MCQ saved successfully";
     } catch (err) {
       throw new Error(`Error Editing MCQ: ${(err as Error).message}`);
+    }
+  }
+
+  public async changeCategory(mcqId: string, category: string) {
+    try {
+      if (!category || category.trim() === "") {
+        throw new Error("Category name cannot be empty");
+      }
+
+      const mcq = await this.mcq
+        .findByIdAndUpdate(
+          mcqId,
+          { category: category.trim() },
+          { new: true, runValidators: true },
+        )
+        .exec();
+
+        if (!mcq) {
+          throw new Error("MCQ not found");
+        }
+
+        return "MCQ saved successfully";
+    } catch (err) {
+      console.error("Mongoose Error Details:", err);
+      throw new Error(`Error changing the category: ${(err as Error).message}`);
     }
   }
 

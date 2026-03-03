@@ -1,18 +1,16 @@
 import { Modal } from "@mui/material";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { FormEvent, SetStateAction, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Flashcard } from "../../types/flashcard";
-import { MCQ, MCQs } from "../../types/mcq";
+import { MCQs } from "../../types/mcq";
 import { QuestionsUpload, transformQuestions } from "../../types/Uploads";
+import { useApp } from "../../context/context";
 
 interface UploadProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<SetStateAction<boolean>>;
   setCategory: (e: string) => void;
   setTitle: (e: string) => void;
-  setQuiz: Dispatch<SetStateAction<MCQ[] | undefined>>
 //   setFlashcard?: (f: Flashcard[]) => void;
-  quiz: MCQ[] | Flashcard[] | undefined;
   type: string;
 }
 
@@ -21,7 +19,6 @@ export default function UploadJson({
   setIsOpen,
   setCategory,
   setTitle,
-  setQuiz,
 //   setFlashcard,
   type,
 }: UploadProps) {
@@ -33,6 +30,7 @@ export default function UploadJson({
 
   const [extractedText, setExtractedText] = useState<QuestionsUpload>();
   const [, setFormat] = useState("JSON")
+  const { dispatch } = useApp();
 
   const navigate = useNavigate();
 
@@ -53,7 +51,6 @@ export default function UploadJson({
         const fileContents = await readFileAsText(selectedFile);
         
         const jsonData: QuestionsUpload = JSON.parse(fileContents);
-        console.log("json data", jsonData)
 
         setExtractedText(jsonData)
         
@@ -94,8 +91,7 @@ export default function UploadJson({
   
     const mcqs = transformQuestions(extractedText?.mcqs || []);
     
-    console.log("MCQQQS: ", mcqs)
-    setQuiz(mcqs);
+    dispatch({ type: "GET_MCQS", payload: mcqs });
 
     const formattedData: MCQs = {
         mcqs: mcqs,

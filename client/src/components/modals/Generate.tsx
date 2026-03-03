@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Flashcard } from "../../types/flashcard";
 import { MCQ, MCQs } from "../../types/mcq";
 import { axiosInstance } from "../../services/auth.service";
+import { toast } from "react-toastify";
 
 interface GenerateProps {
   isOpen: boolean;
@@ -111,11 +112,13 @@ export default function Generate({
         setFlashcard(parsedData.questions);
       }
 
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
       setIsGenerating(false);
       setIsGenerated(false);
       console.error("Error generating quiz/flashcards:", error);
+      toast.error(error)
+      throw(error)
     }
   }
 

@@ -1,6 +1,7 @@
 import { Modal } from "@mui/material";
 import { axiosInstance } from "../../services/auth.service";
 import { useApp } from "../../context/context";
+import { toast } from "react-toastify";
 
 interface DeleteCategoryProps {
     del: boolean;
@@ -15,8 +16,9 @@ export default function DeleteCategory({del, setDel, category}: DeleteCategoryPr
             .then(() => {
                 setDel(false);
 
-                window.location.reload();
-                dispatch({type: "DELETE_MCQS_TOPIC", payload: category})
+                // window.location.reload();
+                dispatch({type: "DELETE_MCQ_CATEGORY", payload: category})
+                toast.success("Category deleted successfully")
             })
             .catch((err) => console.log(err))
     }

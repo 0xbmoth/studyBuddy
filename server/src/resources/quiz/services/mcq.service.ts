@@ -95,11 +95,13 @@ export default class McqService {
         throw new Error("Category name cannot be empty");
       }
 
+      console.log(mcqId)
+
       const mcq = await this.mcq
         .findByIdAndUpdate(
           mcqId,
           { category: category.trim() },
-          { new: true, runValidators: true },
+          { new: true },
         )
         .exec();
 

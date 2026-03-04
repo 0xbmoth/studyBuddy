@@ -30,6 +30,22 @@ export default function QuizPage() {
     if (state.mcqs.length > 0) {
       const selectMcq = state.mcqs.find((m: MCQs) => m._id === quizId);
       setMcq(selectMcq);
+
+      if (state.mcqsTopics.length == 0) {
+        const sortedMcqs = state.mcqs.sort((x: any, y: any) => 
+          new Date(y.updatedAt).getTime() - new Date(x.updatedAt).getTime()
+        );
+
+        const userTopics = sortedMcqs.map((m: any) => ({
+          name: m.title,
+          category: m.category,
+          numberOfQuestions: m.mcqs?.length || 0,
+          id: m._id,
+          score: `${m.score || 0}/${m.mcqs?.length || 0}`
+        }));
+
+        dispatch({type: 'GET_MCQS_TOPIC', payload: userTopics})
+      }
       return;
     }
 

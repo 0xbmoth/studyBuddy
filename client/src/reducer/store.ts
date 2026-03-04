@@ -60,6 +60,8 @@ export type Action =
   | { type: "REMOVE_MCQS"; payload: MCQs }
   | { type: "SET_SCORE"; payload: TitleStat[] }
   | { type: "UPDATE_MCQ_CATEGORY", payload: { id: string, category: string } }
+  | { type: "DELETE_MCQ_CATEGORY", payload: string }
+  | { type: "SAVE_ATTEMPT", payload: { id: string, score: number } }
 
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -97,6 +99,8 @@ export function reducer(state: AppState, action: Action): AppState {
       const filteredTopics = state.mcqsTopics.filter(
         (topic) => topic.id !== action.payload
       );
+
+      console.log(filteredTopics)
       localStorage.setItem("mcqsTopics", JSON.stringify(filteredTopics));
 
       return { ...state, mcqsTopics: filteredTopics };
@@ -119,6 +123,25 @@ export function reducer(state: AppState, action: Action): AppState {
       localStorage.setItem("mcqsTopics", JSON.stringify(updatedTopics));
 
       return { ...state, mcqs: updatedMcqs, mcqsTopics: updatedTopics };
+    
+    case "SAVE_ATTEMPT":
+      let newMcqState = state.mcqs.map((item: any) => 
+        (item._id === action.payload.id || item.id === action.payload.id)
+        ? { ...item, score: action.payload.score }
+        : item
+      )
+      
+      let newTopicState = state.mcqsTopics.map((item: any) => 
+        (item._id === action.payload.id || item.id === action.payload.id)
+        ? { ...item, score: `${action.payload.score}/${item.numberOfQuestions}` }
+        : item
+      )
+
+      localStorage.setItem("mcqs", JSON.stringify(newMcqState))
+      localStorage.setItem("mcqsTopics", JSON.stringify(newTopicState));
+
+      return { ...state, mcqs: newMcqState, mcqsTopics: newTopicState }
+    
     case "REMOVE_MCQS":
       return { ...state, mcqs: [...state.mcqs, action.payload] };
 
@@ -137,6 +160,25 @@ export function reducer(state: AppState, action: Action): AppState {
             : topic
         ),
       };
+
+      case "DELETE_MCQ_CATEGORY":
+        let mcqsAfterDeletion = state.mcqs.filter((item: any) =>
+          item.category != action.payload
+        )
+
+        let topicAfterDeletion = state.mcqsTopics.filter((topic: any) =>
+          topic.category != action.payload
+        )
+
+        localStorage.setItem("mcqs", JSON.stringify(mcqsAfterDeletion))
+        localStorage.setItem("mcqsTopics", JSON.stringify(topicAfterDeletion));
+        
+        return {
+          ...state,
+          mcqs: mcqsAfterDeletion,
+          
+          mcqsTopics: topicAfterDeletion,
+        };
     default:
       return state;
   }

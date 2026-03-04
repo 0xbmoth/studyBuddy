@@ -1,6 +1,6 @@
 import { faTrashCan, faCheckCircle, faTimesCircle, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FC, MouseEvent } from 'react';
+import { FC, MouseEvent, useEffect } from 'react';
 
 interface QuestionOptionProps {
     option: string;
@@ -14,6 +14,7 @@ interface QuestionOptionProps {
 
 export const QuestionOption: FC<QuestionOptionProps> = ({
     option,
+    index,
     isSubmitted,
     isCorrectAnswer,
     isSelected,
@@ -75,7 +76,7 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
             aria-disabled={isSubmitted}
             tabIndex={isSubmitted ? -1 : 0}
             onClick={!isSubmitted ? onOptionClick : undefined}
-            onKeyDown={(e) => e.key === ' ' && !isSubmitted && onOptionClick()}
+            onKeyDown={(e) => { console.log("key",e.key) ;if (e.key === `Digit${index + 1}`) onOptionClick() }}
             className={`group justify-between dark:bg-[#2b2a2a] flex items-center p-3 rounded-xl border transition-all outline-none focus:ring-2 focus:ring-pink-400 ${getContainerStyles()}`}
         >
             <div className="flex items-center gap-3">

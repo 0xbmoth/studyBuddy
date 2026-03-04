@@ -44,6 +44,7 @@ export default function MoveTopic({ move, topicId, setMove }: MoveTopicProps) {
         setMove(false);
         resetForm();
     } catch (err: any) {
+        setUpdating(false);
         toast.error(`${err}.`);
     }
   };

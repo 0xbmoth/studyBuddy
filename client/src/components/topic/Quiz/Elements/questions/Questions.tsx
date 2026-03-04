@@ -12,6 +12,7 @@ import DeleteQuestion from "../../../../modals/DeleteQuestion";
 import { EditQuestion } from "../../../../modals/EditQuestion";
 import { useApp } from "../../../../../context/context";
 import { toast } from "react-toastify";
+import { answerKind } from "../../../../../types/Answer";
 
 interface QuestionsProps {
     mcq: {
@@ -28,17 +29,21 @@ interface QuestionsProps {
             answered?: boolean;
             label?: string
         }[];
-        score: number
+        correct: number
     };
     setMcq: (m: MCQs | null) => void;
     userId: string;
     answers: Record<number, boolean>;
     setAnswers: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
+    correction: {
+        answered: boolean;
+        correct: answerKind;
+    }[],
 }
 
-const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswers }) => {
+const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswers, correction }) => {
     const [showScore, setShowScore] = useState<boolean>(false);
-    const [score, setScore] = useState<number>(0);
+    const score = useRef<number>(0);
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
     const [selectedOptions, setSelectedOptions] = useState<Record<string, number[]>>({});
 
@@ -49,7 +54,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const [addingOption, setAddingOption] = useState<AddingOption | null>(null);
     const [savingQuestion, setSavingQuestion] = useState<boolean>(false);
     const [canMove, setCanMove] = useState(true);
-    const [savingAttempt, setSavingAttempt] = useState(false);
+    const savingAttempt = useRef(false);
 
     const { dispatch } = useApp();
     
@@ -65,6 +70,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const location = useLocation();
 
     const handleOptionClick = (index: number): void => {
+        console.log(index)
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
         const selectedForThisQuestion = selectedOptions[currentQuestion.id as string] || [];
         const isSelected = selectedForThisQuestion.includes(index);
@@ -79,7 +85,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
     useEffect(() => {
         if (!location.pathname.includes("sample-quiz") && (shouldDelete || shouldEdit)) {
-            saveChanges();
+            saveChanges(score.current);
             setShouldDelete(false);
             setShouldEdit(false);
         }
@@ -190,10 +196,10 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 .map(i => i > index ? i - 1 : i)
         }));
 
-        if (!location.pathname.includes("sample-quiz")) saveChanges();
+        if (!location.pathname.includes("sample-quiz")) saveChanges(correction.filter(x => x.correct === "correct").length);
     };
 
-    const saveChanges = async () => {
+    const saveChanges = async (currentScore: number) => {
         const token = localStorage.getItem("accessToken");
 
         try {
@@ -202,7 +208,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 title: mcq.title,
                 category: mcq.category,
                 mcqs: mcq.mcqs,
-                score: score
+                score: currentScore
             },
             {
                 headers: {
@@ -226,7 +232,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             [currentQuestionIndex]: isCorrect
         }));
 
-        if (isCorrect) setScore(prev => prev + 1);
+        if (isCorrect) score.current += 1;
 
         currentQuestion.answered = true;
     };
@@ -252,7 +258,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
         setSelectedOptions({});
         setIsSubmitted(false);
         setCurrentQuestionIndex(0);
-        setScore(0);
+        score.current = 0;
         setShowScore(false);
         setAnswers({});
     };
@@ -262,17 +268,21 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     };
 
     const handleShowScore = (): void => {
+        const finalScore = correction.filter(x => x.correct === "correct").length;
+        score.current = finalScore
         setShowScore(true);
     };
 
     const handleSaveAttempt = async (): Promise<void> => {
+        const finalScore = correction.filter(x => x.correct === "correct").length;
+        console.log(userId)
         const mcqAttempt = {
             mcqAttempts: {
                 userId,
                 mcqSetId: mcq._id,
                 title: mcq.title,
                 numberOfQuestions: mcq.mcqs.length,
-                score,
+                score: finalScore,
                 answers,
                 timestamp: new Date(),
             },
@@ -280,10 +290,13 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
         try {
             await axiosInstance.post("/attempt/mcq", mcqAttempt);
-            await saveChanges()
+            await saveChanges(finalScore)
+            dispatch({ type: "SAVE_ATTEMPT", payload: { id: mcq._id as string, score: score.current } })
             navigate("/quiz", { replace: true })
-        } catch (error) {
-            console.error("Failed to save attempt:", error);
+            toast.success("Attempt saved with success!")
+        } catch (error: any) {
+            toast.error(error)
+            throw(error)
         }
     };
 
@@ -295,7 +308,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 category: mcq.category[0].toLocaleUpperCase() + mcq.category.substring(1),
                 mcqs: mcq.mcqs,
                 explanation: mcq.explanation,
-                score: mcq.score
+                score: score.current
             });
 
             dispatch({type: "ADD_MCQS", payload: mcq})
@@ -312,10 +325,10 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     if (showScore) {
         return (
             <ScoreDisplay
-                score={score}
+                score={score.current}
                 totalQuestions={mcq.mcqs.length}
                 onSaveAttempt={handleSaveAttempt}
-                savingAttempt={savingAttempt}
+                savingAttempt={savingAttempt.current}
                 onStartOver={handleStartOver}
             />
         );

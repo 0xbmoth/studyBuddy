@@ -3,6 +3,7 @@ import { Modal } from "@mui/material";
 import { initialState, reducer } from "../../reducer/store";
 import { Output } from "../../types/output";
 import { axiosInstance } from "../../services/auth.service";
+import { toast } from "react-toastify";
 
 
 interface DeleteTopicProps {
@@ -22,7 +23,10 @@ export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicPro
             dispatch({type: "DELETE_MCQS_TOPIC", payload: topicId})
             window.location.reload()
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            toast.error(err)
+            throw(err)
+    }   );
     }
 
     return (

@@ -127,7 +127,7 @@ export default function Quiz() {
                 </nav>
 
                 <div className="max-w-3xl mx-auto p-6">
-                    <Questions mcq={mcq} setMcq={setMcq} userId={userId} answers={answers} setAnswers={setAnswers}/>
+                    <Questions correction={correction} mcq={mcq} setMcq={setMcq} userId={userId} answers={answers} setAnswers={setAnswers}/>
                 </div>
             </div>
 

@@ -25,6 +25,7 @@ interface QuestionsProps {
             question: string;
             options: string[];
             answers: number[];
+            selected?: number[];
             explanation: string;
             answered?: boolean;
             label?: string
@@ -45,7 +46,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const [showScore, setShowScore] = useState<boolean>(false);
     const score = useRef<number>(0);
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-    const [selectedOptions, setSelectedOptions] = useState<Record<string, number[]>>({});
 
     const currentQuestionIndexRef = useRef(0);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(currentQuestionIndexRef.current);
@@ -70,18 +70,50 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const location = useLocation();
 
     const handleOptionClick = (index: number): void => {
-        console.log(index)
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
-        const selectedForThisQuestion = selectedOptions[currentQuestion.id as string] || [];
-        const isSelected = selectedForThisQuestion.includes(index);
+        if (currentQuestion.answered) return;
 
-        setSelectedOptions(prev => ({
-            ...prev,
-            [currentQuestion.id as string]: isSelected
-                ? selectedForThisQuestion.filter(i => i !== index)
-                : [...selectedForThisQuestion, index]
-        }));
+        const currentSelections = currentQuestion.selected || [];
+        
+        const newSelection = currentSelections.includes(index)
+            ? currentSelections.filter(i => i !== index)
+            : [...currentSelections, index];
+
+        const updatedMcqs = [...mcq.mcqs];
+        updatedMcqs[currentQuestionIndex] = {
+            ...currentQuestion,
+            selected: newSelection
+        };
+
+        setMcq({ ...mcq, mcqs: updatedMcqs });
     };
+
+    useEffect(() => {
+        // 1. Ensure 'selected' array exists for all questions
+        const updatedMcqs = mcq.mcqs.map(q => ({
+            ...q,
+            selected: q.selected || []
+        }));
+
+        // 2. Update the parent state
+        setMcq({
+            ...mcq,
+            mcqs: updatedMcqs
+        });
+
+        // 3. Populate the local state with existing selections
+        const initialSelections: Record<string, number[]> = {};
+        updatedMcqs.forEach(q => {
+            if (q.selected && q.selected.length > 0) {
+                initialSelections[q.id] = q.selected;
+            }
+        });
+
+        // 4. Sync the isSubmitted status for the first question
+        if (updatedMcqs[0]?.answered) {
+            setIsSubmitted(true);
+        }
+    }, []);
 
     useEffect(() => {
         if (!location.pathname.includes("sample-quiz") && (shouldDelete || shouldEdit)) {
@@ -98,18 +130,10 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             ...mcq.mcqs.slice(0, currentQuestionIndex),
             ...mcq.mcqs.slice(currentQuestionIndex + 1)
         ];
-
-        const deletedQuestionId = mcq.mcqs[currentQuestionIndex].id;
         
         setMcq({
             ...mcq,
             mcqs: updatedMcqs
-        });
-
-        setSelectedOptions(prev => {
-            const newSelectedOptions = {...prev};
-            delete newSelectedOptions[deletedQuestionId];
-            return newSelectedOptions;
         });
 
         setAnswers(prev => {
@@ -188,14 +212,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             .filter(answerIndex => answerIndex !== index)
             .map(answerIndex => answerIndex > index ? answerIndex - 1 : answerIndex);
 
-        const selectedForThisQuestion = selectedOptions[currentQuestion.id as string] || [];
-        setSelectedOptions(prev => ({
-            ...prev,
-            [currentQuestion.id as string]: selectedForThisQuestion
-                .filter(i => i !== index)
-                .map(i => i > index ? i - 1 : i)
-        }));
-
         if (!location.pathname.includes("sample-quiz")) saveChanges(correction.filter(x => x.correct === "correct").length);
     };
 
@@ -220,42 +236,56 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
         }
     }
     
-    const handleSubmit = () : void => {
+    const handleSubmit = (): void => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
-        const selectedForThisQuestion = selectedOptions[currentQuestion.id as string] || [];
-        const isCorrect = selectedForThisQuestion.sort().toString() === currentQuestion.answers.sort().toString();
+        
+        const selectedForThisQuestion = currentQuestion.selected || [];
+        const correctAnswers = currentQuestion.answers;
+
+        const isCorrect = 
+            selectedForThisQuestion.length === correctAnswers.length &&
+            selectedForThisQuestion.every(val => correctAnswers.includes(val));
 
         setIsSubmitted(true);
-        setAnswered(prev => prev + 1);
+        
         setAnswers(prev => ({
             ...prev,
             [currentQuestionIndex]: isCorrect
         }));
 
-        if (isCorrect) score.current += 1;
+        if (isCorrect) {
+            score.current += 1;
+        }
 
-        currentQuestion.answered = true;
+        const updatedMcqs = [...mcq.mcqs];
+        updatedMcqs[currentQuestionIndex] = {
+            ...currentQuestion,
+            answered: true
+        };
+
+        setMcq({
+            ...mcq,
+            mcqs: updatedMcqs
+        });
     };
 
     const handleNext = (): void => {
         if (currentQuestionIndex < mcq.mcqs.length - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            currentQuestionIndexRef.current += 1;
-            setIsSubmitted(false);
-            setSelectedOptions({});
+            const nextIndex = currentQuestionIndex + 1;
+            setCurrentQuestionIndex(nextIndex);
+            setIsSubmitted(!!mcq.mcqs[nextIndex].answered);
         }
     };
 
     const handlePrevious = (): void => {
         if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(prev => prev - 1);
-            currentQuestionIndexRef.current -= 1;
-            setIsSubmitted(false);
+            const prevIndex = currentQuestionIndex - 1;
+            setCurrentQuestionIndex(prevIndex);
+            setIsSubmitted(!!mcq.mcqs[prevIndex].answered);
         }
     };
 
     const handleStartOver = (): void => {
-        setSelectedOptions({});
         setIsSubmitted(false);
         setCurrentQuestionIndex(0);
         score.current = 0;
@@ -275,7 +305,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
     const handleSaveAttempt = async (): Promise<void> => {
         const finalScore = correction.filter(x => x.correct === "correct").length;
-        console.log(userId)
+
         const mcqAttempt = {
             mcqAttempts: {
                 userId,
@@ -388,19 +418,22 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             </div>
             
             <div className="space-y-4 mb-6">
-                {mcq.mcqs[currentQuestionIndex].options.map((option, index) => (
-                    <QuestionOption
-                        key={index}
-                        option={option}
-                        index={index}
-                        isSubmitted={isSubmitted || mcq.mcqs[currentQuestionIndex].answered as boolean}
-                        isCorrectAnswer={isCorrectAnswer(index)}
-                        isSelected={selectedOptions[mcq.mcqs[currentQuestionIndex].id]?.includes(index)}
-                        onOptionClick={() => handleOptionClick(index)}
-                        onDeleteClick={(e) => handleDeleteOption(index, e)}
-                    />
-                ))}
-                
+                {mcq.mcqs[currentQuestionIndex].options.map((option, index) => {
+                    const currentQuestion = mcq.mcqs[currentQuestionIndex];
+                    
+                    return (
+                        <QuestionOption
+                            key={`${currentQuestion.id}-${index}`}
+                            option={option}
+                            index={index}
+                            isSubmitted={!!currentQuestion.answered}
+                            isCorrectAnswer={isCorrectAnswer(index)}
+                            isSelected={currentQuestion.selected?.includes(index) || false}
+                            onOptionClick={() => handleOptionClick(index)}
+                            onDeleteClick={(e) => handleDeleteOption(index, e)}
+                        />
+                    );
+                })}
                 <button
                     onClick={handleAddOptionClick}
                     className="w-full p-3 border border-dashed border-gray-300 rounded-lg text-gray-500 dark:text-gray-400 hover:border-gray-500 hover:text-gray-700 transition-all flex items-center justify-center gap-2"
@@ -412,7 +445,14 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
             <button
                 onClick={handleSubmit}
-                disabled={!selectedOptions[mcq.mcqs[currentQuestionIndex].id]?.length || isSubmitted || answers[currentQuestionIndex] !== undefined}
+                disabled={
+                    // Disable if the 'selected' array is empty or undefined
+                    !(mcq.mcqs[currentQuestionIndex].selected?.length) || 
+                    // Disable if the question is already marked as answered in the data
+                    mcq.mcqs[currentQuestionIndex].answered ||
+                    // Disable if the local isSubmitted state is true (backup safety)
+                    isSubmitted
+                }
                 className="mt-4 bg-pink-500 py-3 px-6 rounded-lg w-full text-lg text-white disabled:bg-gray-300 disabled:dark:bg-zinc-500 disabled:cursor-not-allowed hover:bg-pink-600 transition-all"
             >
                 Submit

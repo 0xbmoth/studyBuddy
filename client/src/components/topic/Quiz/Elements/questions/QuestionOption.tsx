@@ -51,6 +51,12 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
         return "border-gray-200 dark:border-zinc-800 opacity-60";
     };
 
+    useEffect(() => {
+    if (isSubmitted) {
+        console.log(`Option: ${option} | Selected: ${isSelected} | Correct: ${isCorrectAnswer}`);
+    }
+}, [isSubmitted, isSelected, isCorrectAnswer, option]);
+
     const getTextColorStyles = () => {
         if (!isSubmitted) {
             return isSelected 
@@ -112,11 +118,20 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
                     </button>
                 )}
                 
-                {/* Badge for "Your Choice" to make incorrect selections obvious */}
-                {isSubmitted && isSelected && !isCorrectAnswer && (
-                    <span className="text-[10px] font-bold uppercase px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md">
-                        Your Choice
-                    </span>
+                {isSubmitted && (
+                    <>
+                        {isSelected && !isCorrectAnswer && (
+                            <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-md bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                                Your Choice
+                            </span>
+                        )}
+
+                        {!isSelected && isCorrectAnswer && (
+                            <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-md bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                                Missed
+                            </span>
+                        )}
+                    </>
                 )}
             </div>
         </div>

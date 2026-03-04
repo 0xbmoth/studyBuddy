@@ -36,12 +36,6 @@ export default function Topics({ type }: TopicsProps) {
     return acc;
   }, {} as Record<string, Topic[]>);
 
-  console.log("grouped",topics.reduce((acc, topic) => {
-    acc[topic.category] = acc[topic.category] || [];
-    acc[topic.category].push(topic);
-    return acc;
-  }, {} as Record<string, Topic[]>))
-
   const toggleCategory = (category: string) => {
     setOpenCategories((prev) => ({ ...prev, [category]: !prev[category] }));
   };
@@ -66,8 +60,6 @@ export default function Topics({ type }: TopicsProps) {
   const closeModal = () => {
     setIsModalOpen(false);
   };
-
-  console.log(state.mcqs)
 
   return (
     <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

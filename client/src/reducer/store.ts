@@ -100,7 +100,6 @@ export function reducer(state: AppState, action: Action): AppState {
         (topic) => topic.id !== action.payload
       );
 
-      console.log(filteredTopics)
       localStorage.setItem("mcqsTopics", JSON.stringify(filteredTopics));
 
       return { ...state, mcqsTopics: filteredTopics };

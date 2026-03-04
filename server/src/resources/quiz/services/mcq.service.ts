@@ -95,8 +95,6 @@ export default class McqService {
         throw new Error("Category name cannot be empty");
       }
 
-      console.log(mcqId)
-
       const mcq = await this.mcq
         .findByIdAndUpdate(
           mcqId,

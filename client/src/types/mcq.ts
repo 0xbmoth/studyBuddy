@@ -5,6 +5,7 @@ export type MCQ = {
   options: string[];
   explanation: string;
   answered?: boolean;
+  selected?: number[];
   score?: number;
   label?: string
   updatedAt?: string

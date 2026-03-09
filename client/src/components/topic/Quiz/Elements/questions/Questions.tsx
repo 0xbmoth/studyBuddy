@@ -50,7 +50,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const currentQuestionIndexRef = useRef(0);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(currentQuestionIndexRef.current);
     
-    const [, setAnswered] = useState<number>(0);
     const [addingOption, setAddingOption] = useState<AddingOption | null>(null);
     const [savingQuestion, setSavingQuestion] = useState<boolean>(false);
     const [canMove, setCanMove] = useState(true);
@@ -291,6 +290,9 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
         score.current = 0;
         setShowScore(false);
         setAnswers({});
+        
+        mcq.mcqs.map(m => m.selected = []);
+        mcq.mcqs.map(m => m.answered = false)
     };
 
     const isCorrectAnswer = (index: number): boolean => {
@@ -304,6 +306,16 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     };
 
     const handleSaveAttempt = async (): Promise<void> => {
+        if (!userId) {
+            try {
+                const userResponse = await axiosInstance.get("http://localhost:3000/api/users")
+
+                userId = userResponse.data.user._id;
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+            }
+        }
+
         const finalScore = correction.filter(x => x.correct === "correct").length;
 
         const mcqAttempt = {
@@ -333,7 +345,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const handleSaveQuestion = async (): Promise<void> => {
         setSavingQuestion(true);
         try {
-            await axiosInstance.post("/quiz", {
+            const response = await axiosInstance.post("/quiz", {
                 title: mcq.title,
                 category: mcq.category[0].toLocaleUpperCase() + mcq.category.substring(1),
                 mcqs: mcq.mcqs,
@@ -341,9 +353,9 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 score: score.current
             });
 
-            dispatch({type: "ADD_MCQS", payload: mcq})
+            dispatch({type: "ADD_MCQS", payload: {mcq: mcq, id: response.data.id}})
 
-            toast.success("MCQs created succesfully!")
+            toast.success("MCQs saved succesfully!")
         } catch (error) {
             console.error("Failed to save quiz:", error);
         } finally {

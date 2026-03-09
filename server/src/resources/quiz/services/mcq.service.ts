@@ -21,8 +21,8 @@ export default class McqService {
       });
 
       await newMcq.save();
-
-      return "MCQ created successfully";
+      const newMcqId = newMcq._id;
+      return newMcqId as string;
     } catch (err) {
       throw new Error("Unable to create user");
     }
@@ -54,7 +54,7 @@ export default class McqService {
       const mcq = await this.mcq.findById(mcqId).exec();
 
       if (!mcq) {
-        throw new Error("Flashcard not found");
+        throw new Error("MCQ not found");
       }
 
       return mcq as MCQ;

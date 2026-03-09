@@ -53,9 +53,10 @@ class QuizController implements Controller {
         return res.status(401).json({ message: "User not authenticated" });
       }
 
-      await this.McqService.save(title, mcqs, userId, category);
+      let mcqId = await this.McqService.save(title, mcqs, userId, category);
+      console.log(mcqId)
 
-      res.status(201).json({ message: "MCQs Created Successfully" });
+      res.status(201).json({ message: "MCQs Created Successfully", id: mcqId });
     } catch (err) {
       next(new HttpException(400, (err as Error).message));
     }

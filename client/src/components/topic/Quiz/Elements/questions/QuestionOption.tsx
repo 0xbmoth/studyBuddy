@@ -51,12 +51,6 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
         return "border-gray-200 dark:border-zinc-800 opacity-60";
     };
 
-    useEffect(() => {
-    if (isSubmitted) {
-        console.log(`Option: ${option} | Selected: ${isSelected} | Correct: ${isCorrectAnswer}`);
-    }
-}, [isSubmitted, isSelected, isCorrectAnswer, option]);
-
     const getTextColorStyles = () => {
         if (!isSubmitted) {
             return isSelected 
@@ -82,7 +76,7 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
             aria-disabled={isSubmitted}
             tabIndex={isSubmitted ? -1 : 0}
             onClick={!isSubmitted ? onOptionClick : undefined}
-            onKeyDown={(e) => { console.log("key",e.key) ;if (e.key === `Digit${index + 1}`) onOptionClick() }}
+            onKeyDown={(e) => { if (e.key === `Digit${index + 1}`) onOptionClick() }}
             className={`group justify-between dark:bg-[#2b2a2a] flex items-center p-3 rounded-xl border transition-all outline-none focus:ring-2 focus:ring-pink-400 ${getContainerStyles()}`}
         >
             <div className="flex items-center gap-3">

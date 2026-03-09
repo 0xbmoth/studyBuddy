@@ -22,6 +22,7 @@ export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicPro
             setDel(false);
             dispatch({type: "DELETE_MCQS_TOPIC", payload: topicId})
             window.location.reload()
+            toast.success(`Topic deleted successfully!`)
         })
         .catch((err) => {
             toast.error(err)

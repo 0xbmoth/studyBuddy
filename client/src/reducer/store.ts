@@ -56,7 +56,7 @@ export type Action =
   | { type: "GET_MCQS"; payload: MCQs[] }
   | { type: "GET_MCQS_TOPIC"; payload: Topic[] }
   | { type: "DELETE_MCQS_TOPIC"; payload: string }
-  | { type: "ADD_MCQS"; payload: MCQs }
+  | { type: "ADD_MCQS"; payload: {mcq: MCQs, id: string} }
   | { type: "REMOVE_MCQS"; payload: MCQs }
   | { type: "SET_SCORE"; payload: TitleStat[] }
   | { type: "UPDATE_MCQ_CATEGORY", payload: { id: string, category: string } }
@@ -105,14 +105,14 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, mcqsTopics: filteredTopics };
     }
     case "ADD_MCQS":
-      const newQuiz = action.payload;
+      const newQuiz = action.payload.mcq;
       const updatedMcqs = [...state.mcqs, newQuiz];
 
       const newTopic: Topic = {
         name: newQuiz.title,
-        category: newQuiz.category,
-        numberOfQuestions: newQuiz.mcqs?.length || 0,
-        id: newQuiz._id || Math.random().toString(),
+        category: newQuiz.category[0].toLocaleUpperCase() + newQuiz.category.substring(1).toLocaleLowerCase(),
+        numberOfQuestions: newQuiz.mcqs?.length - 1 || 0,
+        id: action.payload.id,
         score: `0/${newQuiz.mcqs?.length || 0}`
       };
 
@@ -124,17 +124,21 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, mcqs: updatedMcqs, mcqsTopics: updatedTopics };
     
     case "SAVE_ATTEMPT":
+      console.log(action.payload)
       let newMcqState = state.mcqs.map((item: any) => 
-        (item._id === action.payload.id || item.id === action.payload.id)
+        (item._id === action.payload.id)
         ? { ...item, score: action.payload.score }
         : item
       )
-      
+
       let newTopicState = state.mcqsTopics.map((item: any) => 
-        (item._id === action.payload.id || item.id === action.payload.id)
+        (item.id === action.payload.id)
         ? { ...item, score: `${action.payload.score}/${item.numberOfQuestions}` }
         : item
       )
+
+      console.log(state.mcqsTopics.filter((item: any) => 
+        (item.id === action.payload.id)))
 
       localStorage.setItem("mcqs", JSON.stringify(newMcqState))
       localStorage.setItem("mcqsTopics", JSON.stringify(newTopicState));

@@ -4,11 +4,11 @@ import Questions from "../components/topic/Quiz/Elements/questions/Questions";
 import UtilityBox from "../components/topic/Quiz/Elements/UtilityBox";
 import { answerKind } from "../types/Answer";
 import { useLocation, useParams } from "react-router-dom";
-import { formatMcq } from "../utils/format";
 import { LogOut } from "lucide-react";
 import Theme from "../components/Theme";
 import GoBack from "../components/modals/GoBack";
 import { axiosInstance } from "../services/auth.service";
+import { useApp } from "../context/context";
 
 export default function Quiz() {
     const { id: topicId } = useParams();
@@ -26,6 +26,8 @@ export default function Quiz() {
     const [canExit, setCanExit] = useState(false);
     const [redirect, setRedirect] = useState("");
 
+    const { state, } = useApp();
+    
     useEffect(() => {
         if (mcq?.mcqs) {
             const corrections = mcq.mcqs.map(() => ({
@@ -50,25 +52,14 @@ export default function Quiz() {
     useEffect(() => {
         if ((mcq && mcq.mcqs && mcq.mcqs.length > 0) || !topicId) return;
 
-        const fetchData = async () => {
-            setIsLoading(true);
-            setError("");
+        setIsLoading(true);
+        setError("");
 
+        const fetchData = async () => {
             try {
-                const [userResponse, mcqResponse] = await Promise.all([
-                    axiosInstance.get("http://localhost:3000/api/users"),
-                    axiosInstance.get(`http://localhost:3000/api/quiz/${topicId}`),
-                ]);
+                const userResponse = await axiosInstance.get("http://localhost:3000/api/users")
 
                 setUserId(userResponse.data.user._id);
-
-                if (!mcqResponse.data.mcq) {
-                    throw new Error("No MCQ data found");
-                }
-
-                setMcq(formatMcq(mcqResponse.data.mcq));
-                setTopic(mcqResponse.data.mcq.title);
-                setCategory(mcqResponse.data.category);
             } catch (error) {
                 console.error("Failed to fetch data:", error);
                 setError(error instanceof Error ? error.message : "Failed to load quiz data");
@@ -77,7 +68,40 @@ export default function Quiz() {
             }
         };
 
-        fetchData();
+        const fetchMcq = async () => {
+            try {
+                const mcqResponse = await axiosInstance.get(`http://localhost:3000/api/quiz/${topicId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+                    }
+                })
+
+                let data = mcqResponse.data;
+
+                setMcq(data.mcq)
+                setTopic(data.title);
+                setCategory(data.category);
+                setIsLoading(false);
+
+                console.log(mcqResponse.data)
+            } catch(err) {
+                console.log(err)
+            }
+        }
+        let stateMcq = state.mcqs.find(m => m._id === topicId);
+
+        if (stateMcq) {
+            setMcq(stateMcq)
+            setTopic(stateMcq.title);
+            setCategory(stateMcq.category);
+            setIsLoading(false);
+            fetchData()
+            return;
+        } else if (topicId) {
+            fetchMcq()
+
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

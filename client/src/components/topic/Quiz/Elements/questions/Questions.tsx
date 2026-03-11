@@ -13,6 +13,7 @@ import { EditQuestion } from "../../../../modals/EditQuestion";
 import { useApp } from "../../../../../context/context";
 import { toast } from "react-toastify";
 import { answerKind } from "../../../../../types/Answer";
+import { v4 as uuidv4 } from 'uuid';
 
 interface QuestionsProps {
     mcq: {
@@ -53,7 +54,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const [addingOption, setAddingOption] = useState<AddingOption | null>(null);
     const [savingQuestion, setSavingQuestion] = useState<boolean>(false);
     const [canMove, setCanMove] = useState(true);
-    const savingAttempt = useRef(false);
+    const [savingAttempt, setSavingAttempt] = useState(false);
 
     const { dispatch } = useApp();
     
@@ -306,6 +307,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     };
 
     const handleSaveAttempt = async (): Promise<void> => {
+        setSavingAttempt(true)
         if (!userId) {
             try {
                 const userResponse = await axiosInstance.get("http://localhost:3000/api/users")
@@ -334,6 +336,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             await axiosInstance.post("/attempt/mcq", mcqAttempt);
             await saveChanges(finalScore)
             dispatch({ type: "SAVE_ATTEMPT", payload: { id: mcq._id as string, score: score.current } })
+            setSavingAttempt(false);
             navigate("/quiz", { replace: true })
             toast.success("Attempt saved with success!")
         } catch (error: any) {
@@ -346,6 +349,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
         setSavingQuestion(true);
         try {
             const response = await axiosInstance.post("/quiz", {
+                id: uuidv4(),
                 title: mcq.title,
                 category: mcq.category[0].toLocaleUpperCase() + mcq.category.substring(1),
                 mcqs: mcq.mcqs,
@@ -370,7 +374,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 score={score.current}
                 totalQuestions={mcq.mcqs.length}
                 onSaveAttempt={handleSaveAttempt}
-                savingAttempt={savingAttempt.current}
+                savingAttempt={savingAttempt}
                 onStartOver={handleStartOver}
             />
         );

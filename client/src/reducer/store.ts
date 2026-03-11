@@ -126,7 +126,7 @@ export function reducer(state: AppState, action: Action): AppState {
     case "SAVE_ATTEMPT":
       console.log(action.payload)
       let newMcqState = state.mcqs.map((item: any) => 
-        (item._id === action.payload.id)
+        (item.id === action.payload.id)
         ? { ...item, score: action.payload.score }
         : item
       )
@@ -149,19 +149,25 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, mcqs: [...state.mcqs, action.payload] };
 
     case "UPDATE_MCQ_CATEGORY":
+      let updatedCategoryMcq = state.mcqs.map((item: any) =>
+        item.id === action.payload.id
+          ? { ...item, category: action.payload.category }
+          : item
+      );
+
+      let updatedCategoryTopic = state.mcqsTopics.map((topic: any) =>
+        topic.id === action.payload.id
+          ? { ...topic, category: action.payload.category }
+          : topic
+      );
+
+      localStorage.setItem("mcqs", JSON.stringify(updatedCategoryMcq))
+      localStorage.setItem("mcqsTopics", JSON.stringify(updatedCategoryTopic));
+
       return {
         ...state,
-        mcqs: state.mcqs.map((item: any) =>
-          item._id === action.payload.id
-            ? { ...item, category: action.payload.category }
-            : item
-        ),
-        
-        mcqsTopics: state.mcqsTopics.map((topic: any) =>
-          topic.id === action.payload.id
-            ? { ...topic, category: action.payload.category }
-            : topic
-        ),
+        mcqs: updatedCategoryMcq,
+        mcqsTopics: updatedCategoryTopic
       };
 
       case "DELETE_MCQ_CATEGORY":

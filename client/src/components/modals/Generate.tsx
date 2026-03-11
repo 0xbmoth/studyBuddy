@@ -106,7 +106,7 @@ export default function Generate({
               label: q.label
           })),
           title: form.topicName,
-          category: form.category,
+          category: form.category[0].toLocaleUpperCase() + form.category.substring(1).toLocaleLowerCase(),
         };
 
       navigate('/quiz-sample', { state: { locationQuiz: formattedData } })

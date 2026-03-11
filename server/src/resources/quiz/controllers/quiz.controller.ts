@@ -42,10 +42,11 @@ class QuizController implements Controller {
   private postMcq = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const {
+        id,
         title,
         category,
         mcqs,
-      }: { title: string; category: string; mcqs: MCQ[] } = req.body;
+      }: { id: string, title: string; category: string; mcqs: MCQ[] } = req.body;
 
       const userId = req.user?.id;
 
@@ -53,7 +54,7 @@ class QuizController implements Controller {
         return res.status(401).json({ message: "User not authenticated" });
       }
 
-      let mcqId = await this.McqService.save(title, mcqs, userId, category);
+      let mcqId = await this.McqService.save(id, title, mcqs, userId, category);
       console.log(mcqId)
 
       res.status(201).json({ message: "MCQs Created Successfully", id: mcqId });

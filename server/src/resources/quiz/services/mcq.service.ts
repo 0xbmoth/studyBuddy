@@ -1,12 +1,12 @@
 import { Types } from "mongoose";
 import { MCQ, MCQs } from "../interfaces/mcq.interface";
 import mcqModel from "../models/mcq.model";
-import { Request } from "express";
 
 export default class McqService {
   private mcq = mcqModel;
 
   public async save(
+    id: string,
     title: string,
     mcqs: MCQ[],
     user: Types.ObjectId,
@@ -14,6 +14,7 @@ export default class McqService {
   ): Promise<String | Error> {
     try {
       const newMcq = new this.mcq({
+        id,
         title,
         category,
         mcqs,
@@ -94,6 +95,8 @@ export default class McqService {
       if (!category || category.trim() === "") {
         throw new Error("Category name cannot be empty");
       }
+
+      console.log(mcqId)
 
       const mcq = await this.mcq
         .findByIdAndUpdate(

@@ -7,6 +7,7 @@ export interface MCQs extends Document {
   score: number;
 }
 export interface MCQ extends Document {
+  id: string,
   question: string;
   options: string[];
   answers: number[];

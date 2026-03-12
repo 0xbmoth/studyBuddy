@@ -83,8 +83,6 @@ export default function Quiz() {
                 setTopic(data.title);
                 setCategory(data.category);
                 setIsLoading(false);
-
-                console.log(mcqResponse.data)
             } catch(err) {
                 console.log(err)
             }

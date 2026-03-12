@@ -91,8 +91,6 @@ export default function Generate({
       setIsGenerated(true);
       setIsOpen(false);
 
-      console.log(response.data)
-
       if (type === "quiz" && setQuiz) {
         setQuiz(parsedData.questions);
 

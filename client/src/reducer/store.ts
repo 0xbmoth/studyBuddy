@@ -124,7 +124,6 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, mcqs: updatedMcqs, mcqsTopics: updatedTopics };
     
     case "SAVE_ATTEMPT":
-      console.log(action.payload)
       let newMcqState = state.mcqs.map((item: any) => 
         (item.id === action.payload.id)
         ? { ...item, score: action.payload.score }
@@ -136,9 +135,6 @@ export function reducer(state: AppState, action: Action): AppState {
         ? { ...item, score: `${action.payload.score}/${item.numberOfQuestions}` }
         : item
       )
-
-      console.log(state.mcqsTopics.filter((item: any) => 
-        (item.id === action.payload.id)))
 
       localStorage.setItem("mcqs", JSON.stringify(newMcqState))
       localStorage.setItem("mcqsTopics", JSON.stringify(newTopicState));
